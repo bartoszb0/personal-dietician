@@ -38,14 +38,14 @@ Backend (once scaffolded, from `backend/`): standard Nest scripts (`start:dev`, 
 2. **Pantry ≠ Staples.** Pantry = every product a user has ever scanned/saved; saving is automatic on scan (grows passively). Staples/favorites = curated subset the AI builds meals from (explicit user action). There is also an excluded/disliked list fed into the AI prompt.
 3. **TDEE/macro math is deterministic backend code — NEVER the AI's job.** Pure `NutritionCalculatorService` using Mifflin-St Jeor (men: `10*kg + 6.25*cm − 5*age + 5`; women: same − 161), activity multipliers 1.2–1.9, goal adjustment capped to sane values. Macro defaults: protein 1.6–2 g/kg, fat ~25% of kcal, carbs fill the remainder. This service must be exhaustively unit-tested.
 4. **AI generates ONE meal at a time, not full plans.** Inputs: user profile, dietary prefs/exclusions, staples list, remaining calories/macros today, time of day, meals already eaten. Output: structured JSON meal card via Vercel AI SDK (`generateObject`/streaming), rendered as it streams, savable to the daily log. "Plan my day" is just sequential meal generations sharing a budget — later feature. Model provider is intentionally undecided: keep provider wiring behind the AI SDK's provider packages so it's swappable; don't hardcode one.
-5. **Versioned nutrition targets.** `NutritionTarget` rows have `effectiveFrom` and are never overwritten, so historical daily logs compare against the target active at that time. Weight is a log (`WeightLog`), not a profile column — gives a free progress chart. Store `birthDate`, not age.
+5. **Versioned nutrition targets.** `NutritionTarget` rows have `effectiveFrom` and are never overwritten, so historical daily logs compare against the target active at that time. Weight is a simple `weightKg` column on Profile (decided against a WeightLog history table for v1; revisit only if a progress chart becomes a feature). Store `birthDate`, not age.
 6. **Onboarding:** multi-step wizard; `PATCH /profile` saves partial data per step; `POST /profile/complete` validates everything, computes targets, stamps `onboardingCompletedAt`. Users can override computed targets (`isCustom` flag). A guard redirects incomplete profiles back to the wizard. Validate with class-validator using sanity ranges (height 100–250 cm, weight 30–300 kg).
 7. **Auth:** reuse the author's existing JWT modules (access + refresh tokens). Do NOT scaffold new auth from scratch.
 8. **Monetization:** free tier = scanning, pantry, manual logging, dashboard. Pro = unlimited AI generation; free is capped at 3 generations/day, **metered server-side**. Stripe Checkout + webhook handler with signature verification; subscription status stored in DB.
 
 ## Data model
 
-`User`, `Profile` (sex, birthDate, heightCm, activityLevel, goal, dietaryPrefs jsonb, mealsPerDay, onboardingCompletedAt), `NutritionTarget` (versioned), `WeightLog`, `Product` (normalized from OFF/USDA, cached), `PantryItem`, `FavoriteItem`, `DailyLogEntry`, `Subscription`, plus an AI usage metering table.
+`User`, `Profile` (sex, birthDate, heightCm, weightKg, activityLevel, goal, dietType enum, onboardingCompletedAt), `NutritionTarget` (versioned), `Product` (normalized from OFF/USDA, cached), `PantryItem`, `FavoriteItem`, `DailyLogEntry`, `Subscription`, plus an AI usage metering table.
 
 ## Explicitly OUT OF SCOPE for v1
 
