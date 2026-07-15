@@ -9,7 +9,52 @@ datasource db {
 }
 
 model User {
-  id        String          @id @default(uuid())
-  email     String          @unique
-  password  String
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  profile  Profile?
+}
+
+enum Sex {
+  MALE
+  FEMALE
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  VERY_ACTIVE
+}
+
+enum Goal {
+  LOSE
+  MAINTAIN
+  GAIN
+}
+
+enum DietType {
+  OMNIVORE
+  VEGETARIAN
+  VEGAN
+  PESCATARIAN
+}
+
+model Profile {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  sex                   Sex?
+  birthDate             DateTime?      @db.Date
+  heightCm              Int?
+  weightKg              Decimal?       @db.Decimal(5, 2)
+  activityLevel         ActivityLevel?
+  goal                  Goal?
+  dietType              DietType?
+  onboardingCompletedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
