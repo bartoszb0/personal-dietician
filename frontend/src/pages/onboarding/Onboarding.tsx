@@ -25,6 +25,7 @@ export default function Onboarding() {
     weightKg: "70",
   })
   const [nutrition, setNutrtion] = useState<NutritionTarget>()
+  const [isLoadingNutrition, setIsLoadingNutrition] = useState(false)
 
   const step = STEPS[stepIndex]
   const isFirst = stepIndex === 0
@@ -57,11 +58,14 @@ export default function Onboarding() {
 
   const handleNutrition = async () => {
     try {
+      setIsLoadingNutrition(true)
       const nutrition = await getNutritionTarget(answers)
       setNutrtion(nutrition)
       console.log(nutrition)
     } catch (e) {
       toastApiError(e)
+    } finally {
+      setIsLoadingNutrition(false)
     }
   }
 
@@ -96,7 +100,7 @@ export default function Onboarding() {
 
         {/* Suggestes calorie intake */}
         {nutrition && step === "review" && (
-          <NutritionTargetCard target={nutrition} />
+          <NutritionTargetCard target={nutrition} answers={answers} />
         )}
 
         {/* nav */}
@@ -108,8 +112,9 @@ export default function Onboarding() {
           )}
           {isLast ? (
             <Button
+              variant="secondary"
               className="flex-1"
-              disabled={!canContinue}
+              disabled={!canContinue || isLoadingNutrition}
               onClick={() => handleNutrition()}
             >
               Get your macro
