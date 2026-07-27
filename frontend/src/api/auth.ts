@@ -1,10 +1,10 @@
 import { api } from "@/lib/api"
 import type { LoginValues } from "@/schemas/loginSchema"
 import type { RegisterValues } from "@/schemas/registerSchema"
-import type { User, UserWithOnboarding } from "@/types/user"
+import type { User } from "@/types/user"
 
-export async function getMe(): Promise<UserWithOnboarding> {
-  const { data } = await api.get<UserWithOnboarding>("/auth/me")
+export async function getMe(): Promise<User> {
+  const { data } = await api.get<User>("/auth/me")
   return data
 }
 
