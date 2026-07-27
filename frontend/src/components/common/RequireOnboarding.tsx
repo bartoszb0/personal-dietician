@@ -8,7 +8,7 @@ export function RequireOnboarding() {
     data: me,
     isPending,
     isError,
-  } = useQuery({ queryKey: ["me"], queryFn: getMe })
+  } = useQuery({ queryKey: ["me"], queryFn: () => getMe(), retry: false })
 
   if (isPending) return <LoadingSpinner /> // checking
   if (isError) return <Navigate to="/login" replace /> // 401 → not logged in
