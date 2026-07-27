@@ -34,6 +34,7 @@ export class AuthService {
       access_token: await this.generateToken(user.id, user.email),
       id: user.id,
       email: user.email,
+      isOnboarded: false,
     };
   }
 
@@ -48,10 +49,16 @@ export class AuthService {
 
     if (!compareResult) throw new UnauthorizedException('Invalid credentials');
 
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId: match.id },
+      select: { onboardingCompletedAt: true },
+    });
+
     return {
       access_token: await this.generateToken(match.id, match.email),
       id: match.id,
       email: match.email,
+      isOnboarded: profile?.onboardingCompletedAt != null,
     };
   }
 

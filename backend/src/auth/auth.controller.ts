@@ -21,7 +21,11 @@ export class AuthController {
   ) {
     const result = await this.authService.register(registerDto);
     res.cookie(AUTH_COOKIE_NAME, result.access_token, getCookieOptions());
-    return { email: result.email, id: result.id };
+    return {
+      email: result.email,
+      id: result.id,
+      isOnboarded: result.isOnboarded,
+    };
   }
 
   @Post('login')
@@ -32,7 +36,11 @@ export class AuthController {
   ) {
     const result = await this.authService.login(loginDto);
     res.cookie(AUTH_COOKIE_NAME, result.access_token, getCookieOptions());
-    return { email: result.email, id: result.id };
+    return {
+      email: result.email,
+      id: result.id,
+      isOnboarded: result.isOnboarded,
+    };
   }
 
   @Post('logout')
