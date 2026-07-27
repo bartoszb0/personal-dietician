@@ -3,6 +3,12 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 
+import { getNutritionTarget } from "@/api/onboarding"
+import { NutritionTargetCard } from "@/components/common/NutritionTargetCard"
+import { STEPS } from "@/constants/onboarding/steps"
+import { toastApiError } from "@/lib/toast-api-error"
+import type { NutritionTarget } from "@/types/nutrition"
+import type { Answers } from "@/types/onboarding"
 import { ActivityStep } from "./components/ActivityStep"
 import { BirthDateStep } from "./components/BirthDateStep"
 import { GoalStep } from "./components/GoalStep"
@@ -10,8 +16,6 @@ import { HeightStep } from "./components/HeightStep"
 import { ReviewStep } from "./components/ReviewStep"
 import { SexStep } from "./components/SexStep"
 import { WeightStep } from "./components/WeightStep"
-import { STEPS } from "@/constants/onboarding/steps"
-import type { Answers } from "@/types/onboarding"
 
 export default function Onboarding() {
   const [stepIndex, setStepIndex] = useState(0)
@@ -20,6 +24,7 @@ export default function Onboarding() {
     heightCm: "175",
     weightKg: "70",
   })
+  const [nutrition, setNutrtion] = useState<NutritionTarget>()
 
   const step = STEPS[stepIndex]
   const isFirst = stepIndex === 0
@@ -50,6 +55,16 @@ export default function Onboarding() {
     }
   })()
 
+  const handleNutrition = async () => {
+    try {
+      const nutrition = await getNutritionTarget(answers)
+      setNutrtion(nutrition)
+      console.log(nutrition)
+    } catch (e) {
+      toastApiError(e)
+    }
+  }
+
   return (
     <div className="flex min-h-svh flex-col items-center justify-center p-6">
       <div className="w-full max-w-md">
@@ -69,13 +84,20 @@ export default function Onboarding() {
         {/* step content */}
         <div className="min-h-64">
           {step === "sex" && <SexStep answers={answers} set={set} />}
-          {step === "birthDate" && <BirthDateStep answers={answers} set={set} />}
+          {step === "birthDate" && (
+            <BirthDateStep answers={answers} set={set} />
+          )}
           {step === "height" && <HeightStep answers={answers} set={set} />}
           {step === "weight" && <WeightStep answers={answers} set={set} />}
           {step === "activity" && <ActivityStep answers={answers} set={set} />}
           {step === "goal" && <GoalStep answers={answers} set={set} />}
           {step === "review" && <ReviewStep answers={answers} set={set} />}
         </div>
+
+        {/* Suggestes calorie intake */}
+        {nutrition && step === "review" && (
+          <NutritionTargetCard target={nutrition} />
+        )}
 
         {/* nav */}
         <div className="mt-8 flex gap-3">
@@ -85,8 +107,12 @@ export default function Onboarding() {
             </Button>
           )}
           {isLast ? (
-            <Button className="flex-1" disabled={!canContinue}>
-              Finish
+            <Button
+              className="flex-1"
+              disabled={!canContinue}
+              onClick={() => handleNutrition()}
+            >
+              Get your macro
             </Button>
           ) : (
             <Button onClick={next} disabled={!canContinue} className="flex-1">
