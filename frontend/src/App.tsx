@@ -3,8 +3,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import Home from "@/pages/Home"
 import NotFound from "@/pages/NotFound"
 import { ProtectedRoute } from "./components/common/ProtectedRoute"
+import { RequireOnboarding } from "./components/common/RequireOnboarding"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import Onboarding from "./pages/onboarding/Onboarding"
 
 export function App() {
   return (
@@ -15,7 +17,10 @@ export function App() {
         <Route path="*" element={<NotFound />} />
 
         <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route element={<RequireOnboarding />}>
+            <Route path="/" element={<Home />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>
