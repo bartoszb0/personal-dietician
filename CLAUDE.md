@@ -55,7 +55,7 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
 ## Key architecture decisions — do not deviate without asking
 
 1. **Targets, streaks, and goal-hit are deterministic backend code — NEVER the AI's job.** This is the app's spine.
-   - Targets: pure `NutritionCalculatorService` using Mifflin-St Jeor (men: `10*kg + 6.25*cm − 5*age + 5`; women: same − 161), activity multipliers 1.2–1.9, goal adjustment capped to sane values. Macro defaults: protein 1.6–2 g/kg, fat ~25% of kcal, carbs fill the remainder. Age is derived from `birthDate` at compute time.
+   - Targets: pure `NutritionCalculatorService` using Mifflin-St Jeor (men: `10*kg + 6.25*cm − 5*age + 5`; women: same − 161), activity multipliers 1.2–1.9, goal adjustment capped to sane values. Macro defaults: protein 2.2 g/kg, fat ~25% of kcal, carbs fill the remainder. Age is derived from `birthDate` at compute time.
    - Goal-hit: a day is a **hit** when that day's total calories AND total protein both fall within **±10%** of the target active that day. A streak is the run of consecutive hit days; the calendar shows per-day hit/miss.
    - Both must be exhaustively unit-tested (formula correctness, ±10% boundaries, empty days, goal caps, macro splits, day-boundary/timezone handling).
 
