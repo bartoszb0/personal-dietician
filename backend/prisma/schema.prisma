@@ -35,13 +35,6 @@ enum Goal {
   GAIN
 }
 
-enum DietType {
-  OMNIVORE
-  VEGETARIAN
-  VEGAN
-  PESCATARIAN
-}
-
 model Profile {
   id     String @id @default(uuid())
   userId String @unique
@@ -53,7 +46,6 @@ model Profile {
   weightKg              Decimal?       @db.Decimal(5, 2)
   activityLevel         ActivityLevel?
   goal                  Goal?
-  dietType              DietType?
   onboardingCompletedAt DateTime?
 
   createdAt DateTime @default(now())
