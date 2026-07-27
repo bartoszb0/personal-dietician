@@ -7,12 +7,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import {
-  ActivityLevel,
-  DietType,
-  Goal,
-  Sex,
-} from '../../../generated/prisma/enums';
+import { ActivityLevel, Goal, Sex } from '../../../generated/prisma/enums';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -42,8 +37,4 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsEnum(Goal)
   goal?: Goal;
-
-  @IsOptional()
-  @IsEnum(DietType)
-  dietType?: DietType;
 }
