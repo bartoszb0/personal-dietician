@@ -124,6 +124,9 @@ Never commit `.env` files; keep `.env.example` files current when adding variabl
 
 ## Conventions
 
-- Validate all external/API responses at the boundary with zod schemas and derive TS types via `z.infer` — never assert hand-written interfaces onto axios generics. Applies doubly to OFF/USDA adapter responses.
+- API response validation is tiered, not blanket:
+  - **Mandatory zod parse at the boundary** for (a) all third-party responses — OFF/USDA adapters especially (quirky, untrusted) — and (b) first-party endpoints whose result drives control flow (e.g. `getMe` → auth/onboarding routing). Derive TS types via `z.infer` so the schema is the single source of truth.
+  - **Typed axios generics (a cast, no runtime check) are acceptable** for trivial, stable first-party responses whose value isn't branched on (e.g. `login`/`register` returning `{id,email}` that the mutation ignores). Rationale: frontend/backend are separate folders with no shared types, so a cast never catches backend drift — accept that only where a wrong shape is low-consequence.
+  - When in doubt, parse. Never assume owning the backend makes a cast safe — it doesn't, without shared/generated types.
 - Backend request validation uses class-validator DTOs; business rules (sanity ranges, target/streak computation) live in services, not controllers.
 - Keep this file updated when a decision above changes — it is the persistent context for all future sessions.
