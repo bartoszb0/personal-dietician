@@ -55,6 +55,20 @@ export class AuthService {
     };
   }
 
+  async getMe(userEmail: string, userId: string) {
+    const profile = await this.prisma.profile.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    return {
+      email: userEmail,
+      id: userId,
+      isOnboarded: profile?.onboardingCompletedAt != null,
+    };
+  }
+
   private async generateToken(userId: string, email: string) {
     return this.jwtService.signAsync({ sub: userId, email });
   }

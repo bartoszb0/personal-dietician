@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
-import type { Response } from 'express';
 import { Throttle, seconds } from '@nestjs/throttler';
+import type { Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { UserPayload } from '../common/types/user-payload.type';
 import { AUTH_COOKIE_NAME, getCookieOptions } from './auth.constants';
@@ -44,6 +44,6 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtGuard)
   me(@CurrentUser() user: UserPayload) {
-    return { email: user.email, id: user.id };
+    return this.authService.getMe(user.email, user.id);
   }
 }
