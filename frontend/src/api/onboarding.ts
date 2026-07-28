@@ -17,7 +17,7 @@ export async function getNutritionTarget(
   input: Answers
 ): Promise<NutritionTarget> {
   const { data } = await api.post<NutritionTarget>(
-    "/profile/preview",
+    "/nutrition/preview",
     toProfilePayload(input)
   )
   return data
