@@ -14,6 +14,7 @@ model User {
   password         String
   profile          Profile?
   nutritionTargets NutritionTarget[]
+  meals            Meal[]
 }
 
 enum Sex {
@@ -64,4 +65,23 @@ model NutritionTarget {
   effectiveFrom DateTime @default(now())
 
   @@index([userId, effectiveFrom])
+}
+
+model Meal {
+  id       String  @id @default(uuid())
+  userId   String
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name     String
+  calories Int
+  proteinG Int
+  fatG     Int
+  carbsG   Int
+
+  ingredients String?
+  recipe      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
