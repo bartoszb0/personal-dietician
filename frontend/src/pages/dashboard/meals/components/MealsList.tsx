@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
 import { LayoutGrid, List } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
-import { getMeals } from "@/api/meals"
+import { searchMeals } from "@/api/meals"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -12,75 +13,79 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-import type { Meal } from "@/types/meal"
+import type { MealSort } from "@/types/meal"
 
 import MealCard, { type MealView } from "./MealCard"
 
-type SortKey = "recent" | "calories" | "protein" | "name"
-
-const SORT_LABELS: Record<SortKey, string> = {
+const SORT_LABELS: Record<MealSort, string> = {
   recent: "Recently added",
   calories: "Calories",
   protein: "Protein",
   name: "Name (A–Z)",
 }
 
-function sortMeals(meals: Meal[], key: SortKey): Meal[] {
-  const copy = [...meals]
-  switch (key) {
-    case "calories":
-      return copy.sort((a, b) => b.calories - a.calories)
-    case "protein":
-      return copy.sort((a, b) => b.proteinG - a.proteinG)
-    case "name":
-      return copy.sort((a, b) => a.name.localeCompare(b.name))
-    case "recent":
-    default:
-      return copy.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-  }
-}
+const PAGE_SIZE = 12
 
-export default function MealsList() {
+export default function MealsList({ search }: { search: string }) {
   const [view, setView] = useState<MealView>("grid")
-  const [sort, setSort] = useState<SortKey>("recent")
+  const [sort, setSort] = useState<MealSort>("recent")
+  const [debouncedSearch, setDebouncedSearch] = useState(search)
 
-  const { data, isPending, isError } = useQuery({
-    queryKey: ["meals"],
-    queryFn: () => getMeals(),
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timeout)
+  }, [search])
+
+  const {
+    data,
+    isPending,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["meals", { search: debouncedSearch, sort, limit: PAGE_SIZE }],
+    queryFn: ({ pageParam }) =>
+      searchMeals({
+        search: debouncedSearch || undefined,
+        sort,
+        page: pageParam,
+        limit: PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page * lastPage.limit < lastPage.total
+        ? lastPage.page + 1
+        : undefined,
+    placeholderData: keepPreviousData,
   })
 
   if (isPending) return <LoadingSpinner />
   if (isError) {
-    return <p className="text-sm text-destructive">Couldn't load meals.</p>
-  }
-  if (data.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        No meals yet — add your first one.
-      </p>
-    )
+    return <p className="mt-4 text-sm text-destructive">Couldn't load meals.</p>
   }
 
-  const meals = sortMeals(data, sort)
+  const meals = data.pages.flatMap((page) => page.items)
+  const total = data.pages[0]?.total ?? 0
 
   return (
     <div className="mt-4 flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm text-muted-foreground">
-          {data.length} meal{data.length === 1 ? "" : "s"}
+          {total} meal{total === 1 ? "" : "s"}
         </span>
 
         <div className="flex items-center gap-2">
           <Select
             items={SORT_LABELS}
             value={sort}
-            onValueChange={(value) => setSort(value as SortKey)}
+            onValueChange={(value) => setSort(value as MealSort)}
           >
             <SelectTrigger size="sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+              {(Object.keys(SORT_LABELS) as MealSort[]).map((key) => (
                 <SelectItem key={key} value={key}>
                   {SORT_LABELS[key]}
                 </SelectItem>
@@ -112,18 +117,39 @@ export default function MealsList() {
         </div>
       </div>
 
-      {view === "grid" ? (
-        <div className="grid grid-cols-2 gap-3">
-          {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} view="grid" />
-          ))}
-        </div>
+      {meals.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          {debouncedSearch
+            ? `No meals match “${debouncedSearch}”.`
+            : "No meals yet — add your first one."}
+        </p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {meals.map((meal) => (
-            <MealCard key={meal.id} meal={meal} view="list" />
-          ))}
-        </div>
+        <>
+          {view === "grid" ? (
+            <div className="grid grid-cols-2 gap-3">
+              {meals.map((meal) => (
+                <MealCard key={meal.id} meal={meal} view="grid" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {meals.map((meal) => (
+                <MealCard key={meal.id} meal={meal} view="list" />
+              ))}
+            </div>
+          )}
+
+          {hasNextPage && (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+            >
+              {isFetchingNextPage ? "Loading…" : "Load more"}
+            </Button>
+          )}
+        </>
       )}
     </div>
   )

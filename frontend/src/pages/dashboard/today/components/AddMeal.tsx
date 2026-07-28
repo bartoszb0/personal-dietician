@@ -1,9 +1,9 @@
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
 import { Plus, Search } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
-import { getMeals } from "@/api/meals"
+import { searchMeals } from "@/api/meals"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,21 +14,62 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import type { Meal } from "@/types/meal"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { Meal, MealSort } from "@/types/meal"
+
+const SORT_LABELS: Record<MealSort, string> = {
+  recent: "Recently added",
+  calories: "Calories",
+  protein: "Protein",
+  name: "Name (A–Z)",
+}
+
+const PAGE_SIZE = 10
 
 export default function AddMeal() {
   const [open, setOpen] = useState(false)
-  const [query, setQuery] = useState("")
+  const [search, setSearch] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [sort, setSort] = useState<MealSort>("recent")
+
+  // debounce the search so we don't hit the server on every keystroke
+  useEffect(() => {
+    const timeout = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(timeout)
+  }, [search])
 
   const {
-    data: meals,
+    data,
     isPending,
     isError,
-  } = useQuery({
-    queryKey: ["meals"],
-    queryFn: () => getMeals(),
-    enabled: open, // only fetch once the picker is opened
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["meals", { search: debouncedSearch, sort, limit: PAGE_SIZE }],
+    queryFn: ({ pageParam }) =>
+      searchMeals({
+        search: debouncedSearch || undefined,
+        sort,
+        page: pageParam,
+        limit: PAGE_SIZE,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page * lastPage.limit < lastPage.total
+        ? lastPage.page + 1
+        : undefined,
+    enabled: open,
+    placeholderData: keepPreviousData, // keep the list while searching
   })
+
+  const meals = data?.pages.flatMap((page) => page.items) ?? []
 
   const addToToday = (meal: Meal) => {
     // TODO: persist to today's log once daily logging (DailyLogEntry) exists.
@@ -36,16 +77,15 @@ export default function AddMeal() {
     setOpen(false)
   }
 
-  const allMeals = meals ?? []
-  const filtered = allMeals.filter((meal) =>
-    meal.name.toLowerCase().includes(query.trim().toLowerCase()),
-  )
-
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (next) setQuery("")
+        if (next) {
+          setSearch("")
+          setDebouncedSearch("")
+          setSort("recent")
+        }
         setOpen(next)
       }}
     >
@@ -53,63 +93,88 @@ export default function AddMeal() {
         <Plus /> Add meal
       </DialogTrigger>
 
-      <DialogContent className="flex max-h-[80vh] flex-col gap-4 sm:max-w-md">
+      <DialogContent className="flex max-h-[80vh] flex-col gap-3 sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add a meal</DialogTitle>
         </DialogHeader>
+
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search meals"
+              className="pl-9"
+            />
+          </div>
+          <Select
+            items={SORT_LABELS}
+            value={sort}
+            onValueChange={(value) => setSort(value as MealSort)}
+          >
+            <SelectTrigger size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {(Object.keys(SORT_LABELS) as MealSort[]).map((key) => (
+                <SelectItem key={key} value={key}>
+                  {SORT_LABELS[key]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {isPending ? (
           <LoadingSpinner />
         ) : isError ? (
           <p className="text-sm text-destructive">Couldn't load meals.</p>
-        ) : allMeals.length === 0 ? (
+        ) : meals.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No saved meals yet — create one in the Meals tab.
+            {debouncedSearch
+              ? `No meals match “${debouncedSearch}”.`
+              : "No saved meals yet — create one in the Meals tab."}
           </p>
         ) : (
-          <>
-            <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search meals"
-                className="pl-9"
-              />
-            </div>
+          <ul className="flex flex-col gap-2 overflow-y-auto">
+            {meals.map((meal) => (
+              <li key={meal.id}>
+                <button
+                  type="button"
+                  onClick={() => addToToday(meal)}
+                  className="flex w-full items-center justify-between gap-3 rounded-xl bg-muted/50 p-3 text-left transition-colors hover:bg-muted"
+                >
+                  <div className="min-w-0">
+                    <div className="truncate font-medium">{meal.name}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {meal.proteinG}g protein · {meal.carbsG}g carbs ·{" "}
+                      {meal.fatG}g fat
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-sm whitespace-nowrap">
+                    <span className="font-bold">
+                      {meal.calories.toLocaleString()}
+                    </span>
+                    <span className="text-muted-foreground"> kcal</span>
+                  </div>
+                </button>
+              </li>
+            ))}
 
-            {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                No meals match “{query.trim()}”.
-              </p>
-            ) : (
-              <ul className="flex flex-col gap-2 overflow-y-auto">
-                {filtered.map((meal) => (
-                  <li key={meal.id}>
-                    <button
-                      type="button"
-                      onClick={() => addToToday(meal)}
-                      className="flex w-full items-center justify-between gap-3 rounded-xl bg-muted/50 p-3 text-left transition-colors hover:bg-muted"
-                    >
-                      <div className="min-w-0">
-                        <div className="truncate font-medium">{meal.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {meal.proteinG}g protein · {meal.carbsG}g carbs ·{" "}
-                          {meal.fatG}g fat
-                        </div>
-                      </div>
-                      <div className="shrink-0 text-sm whitespace-nowrap">
-                        <span className="font-bold">
-                          {meal.calories.toLocaleString()}
-                        </span>
-                        <span className="text-muted-foreground"> kcal</span>
-                      </div>
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            {hasNextPage && (
+              <li>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage ? "Loading…" : "Load more"}
+                </Button>
+              </li>
             )}
-          </>
+          </ul>
         )}
       </DialogContent>
     </Dialog>
