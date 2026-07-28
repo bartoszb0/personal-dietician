@@ -1,13 +1,18 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
-import Home from "@/pages/Home"
 import NotFound from "@/pages/NotFound"
+import { DashboardLayout } from "./components/common/DashboardLayout"
 import { ProtectedRoute } from "./components/common/ProtectedRoute"
 import { RedirectIfOnboarded } from "./components/common/RedirectIfOnboarded"
 import { RequireOnboarding } from "./components/common/RequireOnboarding"
+import Calendar from "./pages/dashboard/calendar/Calendar"
+import Meals from "./pages/dashboard/meals/Meals"
+import Profile from "./pages/dashboard/profile/Profile"
+import Scanner from "./pages/dashboard/scanner/Scanner"
+import Today from "./pages/dashboard/today/Today"
 import Login from "./pages/Login"
-import Register from "./pages/Register"
 import Onboarding from "./pages/onboarding/Onboarding"
+import Register from "./pages/Register"
 
 export function App() {
   return (
@@ -22,7 +27,13 @@ export function App() {
             <Route path="/onboarding" element={<Onboarding />} />
           </Route>
           <Route element={<RequireOnboarding />}>
-            <Route path="/" element={<Home />} />
+            <Route element={<DashboardLayout />}>
+              <Route path="/" element={<Today />} />
+              <Route path="/meals" element={<Meals />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/scanner" element={<Scanner />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
           </Route>
         </Route>
       </Routes>
