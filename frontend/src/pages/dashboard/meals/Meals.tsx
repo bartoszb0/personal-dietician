@@ -1,3 +1,4 @@
+import MealsList from "./components/MealsList"
 import NewMeal from "./components/NewMeal"
 import SearchInput from "./components/SearchInput"
 
@@ -8,6 +9,7 @@ export default function Meals() {
         <SearchInput />
         <NewMeal />
       </div>
+      <MealsList />
     </div>
   )
 }
