@@ -1,13 +1,41 @@
+import { finishOnboarding } from "@/api/onboarding"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { MACROS } from "@/constants/macro"
+import { toastApiError } from "@/lib/toast-api-error"
 import type { NutritionTarget } from "@/types/nutrition"
+import type { Answers } from "@/types/onboarding"
+import type { User } from "@/types/user"
+import { useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Button } from "../ui/button"
 
-const MACROS = [
-  { key: "proteinG", label: "Protein", kcalPerGram: 4 },
-  { key: "carbsG", label: "Carbs", kcalPerGram: 4 },
-  { key: "fatG", label: "Fat", kcalPerGram: 9 },
-] as const
+export function NutritionTargetCard({
+  target,
+  answers,
+}: {
+  target: NutritionTarget
+  answers: Answers
+}) {
+  const [isLoading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-export function NutritionTargetCard({ target }: { target: NutritionTarget }) {
+  const handleFinish = async () => {
+    try {
+      setLoading(true)
+      await finishOnboarding(answers)
+      queryClient.setQueryData<User>(["me"], (prev) =>
+        prev ? { ...prev, isOnboarded: true } : prev
+      )
+      navigate("/", { replace: true })
+    } catch (e) {
+      toastApiError(e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -41,6 +69,10 @@ export function NutritionTargetCard({ target }: { target: NutritionTarget }) {
             )
           })}
         </div>
+
+        <Button className="w-full" onClick={handleFinish} disabled={isLoading}>
+          Save
+        </Button>
       </CardContent>
     </Card>
   )
