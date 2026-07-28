@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  ageFromBirthDate,
-  NutritionCalculatorService,
-  type NutritionTargets,
-} from '../nutrition/nutrition-calculator.service';
+import { NutritionService } from '../nutrition/nutrition.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -12,19 +8,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export class ProfileService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly nutritionCalculator: NutritionCalculatorService,
+    private readonly nutrition: NutritionService,
   ) {}
-
-  private computeTargets(dto: CreateProfileDto): NutritionTargets {
-    return this.nutritionCalculator.calculate({
-      sex: dto.sex,
-      age: ageFromBirthDate(new Date(dto.birthDate)),
-      heightCm: dto.heightCm,
-      weightKg: dto.weightKg,
-      activityLevel: dto.activityLevel,
-      goal: dto.goal,
-    });
-  }
 
   async getProfile(userId: string) {
     return this.prisma.profile.findUnique({
@@ -34,12 +19,8 @@ export class ProfileService {
     });
   }
 
-  previewTarget(dto: CreateProfileDto): NutritionTargets {
-    return this.computeTargets(dto);
-  }
-
   async createProfile(userId: string, dto: CreateProfileDto) {
-    const targets = this.computeTargets(dto);
+    const targets = this.nutrition.computeTargets(dto);
 
     return this.prisma.$transaction(async (tx) => {
       const profile = await tx.profile.create({

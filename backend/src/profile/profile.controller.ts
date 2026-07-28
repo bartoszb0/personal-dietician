@@ -16,11 +16,6 @@ export class ProfileController {
     return this.profileService.getProfile(user.id);
   }
 
-  @Post('preview')
-  previewTarget(@Body() dto: CreateProfileDto) {
-    return this.profileService.previewTarget(dto);
-  }
-
   @Post()
   createProfile(
     @CurrentUser() user: UserPayload,
