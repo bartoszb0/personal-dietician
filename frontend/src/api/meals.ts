@@ -1,9 +1,18 @@
 import { api } from "@/lib/api"
 import type { MealValues } from "@/schemas/mealSchema"
-import type { Meal } from "@/types/meal"
+import type { Meal, MealSort, MealsPage } from "@/types/meal"
 
-export async function getMeals(): Promise<Meal[]> {
-  const { data } = await api.get<Meal[]>("/meals")
+export type SearchMealsParams = {
+  search?: string
+  sort?: MealSort
+  page?: number
+  limit?: number
+}
+
+export async function searchMeals(
+  params: SearchMealsParams
+): Promise<MealsPage> {
+  const { data } = await api.get<MealsPage>("/meals", { params })
   return data
 }
 
