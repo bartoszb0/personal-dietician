@@ -11,3 +11,12 @@ export type Meal = {
   createdAt: string
   updatedAt: string
 }
+
+export type MealSort = "recent" | "calories" | "protein" | "name"
+
+export type MealsPage = {
+  items: Meal[]
+  total: number
+  page: number
+  limit: number
+}
