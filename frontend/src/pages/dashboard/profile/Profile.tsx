@@ -7,7 +7,7 @@ import LoadingSpinner from "@/components/common/LoadingSpinner"
 import LogoutBtn from "@/components/common/LogoutBtn"
 
 import AccountCard from "./components/AccountCard"
-import DailyTargets from "./components/DailyTargets"
+import DailyTargets from "./components/DailyTarget"
 import ProfileDetails from "./components/ProfileDetails"
 
 export default function Profile() {

@@ -1,13 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { MACROS } from "@/constants/macro"
 import type { UserNutritionTarget } from "@/types/nutrition"
 
-export default function DailyTargets({
+export default function DailyTarget({
   target,
 }: {
   target: UserNutritionTarget
@@ -15,7 +10,7 @@ export default function DailyTargets({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">Daily targets</CardTitle>
+        <CardTitle className="text-base">Daily target</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col items-center gap-0.5">
