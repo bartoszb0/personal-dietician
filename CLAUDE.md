@@ -59,7 +59,7 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
    - Goal-hit: a day is a **hit** when **both** of these hold for that day's totals vs the target active that day: (a) **calories within ±10%** — no more than 10% under and no more than 10% over; (b) **protein at or above target** — protein is a floor with no upper bound (more protein never fails a day). **Carbs and fat do NOT affect the hit** — missing them never fails the day (they're guidance, not gates). A streak is the run of consecutive hit days; the calendar shows per-day hit/miss.
    - Both must be exhaustively unit-tested (formula correctness, the calorie ±10% boundaries both directions, protein exactly at target and just under, carbs/fat ignored, empty days, goal caps, macro splits, day-boundary/timezone handling).
 
-2. **Dishes and logging.** A `Dish` is user-created: a name plus its calories/macros, **entered manually**. It may optionally carry free-text "how to make it" instructions and an optional list of products with quantities — but those are reference metadata only; the dish's macros are the user-entered totals and are NOT auto-computed from the products (auto-deriving macros would be recipe-engine territory, out of scope). `DailyLogEntry` = one thing eaten on a day; it references **either** a saved `Dish` **or** a scanned `Product`, and stores a **snapshot** of the calories/macros it contributed, so editing or deleting a dish later never rewrites past days. Today's counter = sum of today's entries.
+2. **Meals and logging.** A `Meal` is user-created: a name plus its calories/macros, **entered manually**. It may optionally carry free-text "how to make it" instructions and an optional list of products with quantities — but those are reference metadata only; the meal's macros are the user-entered totals and are NOT auto-computed from the products (auto-deriving macros would be recipe-engine territory, out of scope). `DailyLogEntry` = one thing eaten on a day; it references **either** a saved `Meal` **or** a scanned `Product`, and stores a **snapshot** of the calories/macros it contributed, so editing or deleting a meal later never rewrites past days. Today's counter = sum of today's entries.
 
 3. **Versioned nutrition targets.** `NutritionTarget` rows have `effectiveFrom` and are never overwritten. A day's hit/miss and the calendar always compare against the target active on that day, so changing your target today leaves past calendar days judged as they were. Weight is a simple `weightKg` column on `Profile` (decided against a WeightLog history table for v1). Store `birthDate`, not age.
 
@@ -69,18 +69,18 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
 
 6. **Auth (already built — do NOT rebuild).** Cookie-based JWT lives in `backend/src/auth`: register/login/logout/me, a `JwtGuard` + passport strategy that reads the token from an httpOnly `access_token` cookie, throttled auth routes. Reuse this; do not scaffold new auth.
 
-7. **AI meal suggestion (secondary / later).** A small feature, layered on only after the core loop works: given the profile, exclusions, staples, and the calories/protein still remaining today, suggest ONE meal at a time (never full plans). Structured JSON via the Vercel AI SDK (`generateObject`/streaming), savable as a `Dish` and/or logged. Keep the provider swappable behind the AI SDK's provider packages — do not hardcode one. Free tier is capped (metered server-side); Pro removes the cap.
+7. **AI meal suggestion (secondary / later).** A small feature, layered on only after the core loop works: given the profile, exclusions, staples, and the calories/protein still remaining today, suggest ONE meal at a time (never full plans). Structured JSON via the Vercel AI SDK (`generateObject`/streaming), savable as a `Meal` and/or logged. Keep the provider swappable behind the AI SDK's provider packages — do not hardcode one. Free tier is capped (metered server-side); Pro removes the cap.
 
-8. **Monetization (later).** Free = dishes, barcode scanning, daily logging, streaks, calendar, dashboard. Pro = unlimited AI suggestions (free capped at 3 generations/day, metered server-side). Stripe Checkout + webhook handler with signature verification; subscription status stored in DB.
+8. **Monetization (later).** Free = meals, barcode scanning, daily logging, streaks, calendar, dashboard. Pro = unlimited AI suggestions (free capped at 3 generations/day, metered server-side). Stripe Checkout + webhook handler with signature verification; subscription status stored in DB.
 
 ## Data model
 
 - `User`, `Profile` (sex, birthDate, heightCm, weightKg, activityLevel, goal, dietType enum, onboardingCompletedAt) — 1:1, `Profile` nullable until onboarding starts.
 - `NutritionTarget` (versioned — `effectiveFrom`, `calories`, `proteinG`, `fatG`, `carbsG`, `isCustom`; never updated in place).
 - `Product` (normalized from OFF/USDA, cached).
-- `Dish` (user-created: name, calories, proteinG, carbsG, fatG, optional `instructions`).
-- `DishProduct` (optional join: dishId, productId, quantity — reference only, does not drive dish macros).
-- `DailyLogEntry` (userId, date, nullable `dishId` **or** nullable `productId`, servings/amount, snapshot of contributed calories/macros).
+- `Meal` (user-created: name, calories, proteinG, carbsG, fatG, optional `instructions`).
+- `MealProduct` (optional join: mealId, productId, quantity — reference only, does not drive meal macros).
+- `DailyLogEntry` (userId, date, nullable `mealId` **or** nullable `productId`, servings/amount, snapshot of contributed calories/macros).
 - `Subscription`, plus an AI usage metering table.
 - Staples/excluded lists (`FavoriteItem` etc.) feed AI suggestions once that feature lands.
 
@@ -88,14 +88,14 @@ Streaks and calendar hit/miss are **computed** from `DailyLogEntry` vs `Nutritio
 
 ## Explicitly OUT OF SCOPE for v1
 
-External recipe import; auto-calculating recipes (macros summed/scaled from ingredients — dishes use user-entered totals only); social features; photo food recognition; workout tracking; full-week meal plans generated at once. User-created dishes with optional instructions and an optional product list ARE in scope.
+External recipe import; auto-calculating recipes (macros summed/scaled from ingredients — meals use user-entered totals only); social features; photo food recognition; workout tracking; full-week meal plans generated at once. User-created meals with optional instructions and an optional product list ARE in scope.
 
 **Refuse scope creep**: if a request drifts into these, remind the user it's out of scope for v1 before doing anything.
 
 ## Testing approach
 
 - `NutritionCalculatorService` and streak/goal-hit logic: exhaustive unit tests (pure functions — formulas, ±10% boundaries, caps, empty days, day boundaries).
-- e2e tests for critical flows only: onboarding completion, logging a dish, logging a scanned product, streak/calendar computation, (later) AI metering cap and Stripe webhook handling.
+- e2e tests for critical flows only: onboarding completion, logging a meal, logging a scanned product, streak/calendar computation, (later) AI metering cap and Stripe webhook handling.
 - Frontend has no test runner yet; add Vitest when the first meaningful logic appears.
 
 ## Environment variables
