@@ -4,27 +4,15 @@ import { useEffect, useState } from "react"
 
 import { searchMeals } from "@/api/meals"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
+import MealSortSelect from "@/components/common/MealSortSelect"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { MEALS_PAGE_SIZE } from "@/constants/meals"
 import { cn } from "@/lib/utils"
 import type { MealSort } from "@/types/meal"
 
 import MealCard, { type MealView } from "./MealCard"
 
-const SORT_LABELS: Record<MealSort, string> = {
-  recent: "Recently added",
-  calories: "Calories",
-  protein: "Protein",
-  name: "Name (A–Z)",
-}
-
-const PAGE_SIZE = 12
+const PAGE_SIZE = MEALS_PAGE_SIZE
 
 export default function MealsList({ search }: { search: string }) {
   const [view, setView] = useState<MealView>("grid")
@@ -76,22 +64,7 @@ export default function MealsList({ search }: { search: string }) {
         </span>
 
         <div className="flex items-center gap-2">
-          <Select
-            items={SORT_LABELS}
-            value={sort}
-            onValueChange={(value) => setSort(value as MealSort)}
-          >
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SORT_LABELS) as MealSort[]).map((key) => (
-                <SelectItem key={key} value={key}>
-                  {SORT_LABELS[key]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MealSortSelect value={sort} onChange={setSort} />
 
           <div className="inline-flex rounded-lg bg-muted p-0.5">
             {(["grid", "list"] as const).map((option) => {

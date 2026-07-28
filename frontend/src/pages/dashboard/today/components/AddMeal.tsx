@@ -5,7 +5,9 @@ import { toast } from "sonner"
 
 import { searchMeals } from "@/api/meals"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
+import MealSortSelect from "@/components/common/MealSortSelect"
 import { Button } from "@/components/ui/button"
+import { MEALS_PAGE_SIZE } from "@/constants/meals"
 import {
   Dialog,
   DialogContent,
@@ -14,23 +16,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import type { Meal, MealSort } from "@/types/meal"
 
-const SORT_LABELS: Record<MealSort, string> = {
-  recent: "Recently added",
-  calories: "Calories",
-  protein: "Protein",
-  name: "Name (A–Z)",
-}
+import MealRow from "./MealRow"
 
-const PAGE_SIZE = 10
+const PAGE_SIZE = MEALS_PAGE_SIZE
 
 export default function AddMeal() {
   const [open, setOpen] = useState(false)
@@ -108,22 +98,7 @@ export default function AddMeal() {
               className="pl-9"
             />
           </div>
-          <Select
-            items={SORT_LABELS}
-            value={sort}
-            onValueChange={(value) => setSort(value as MealSort)}
-          >
-            <SelectTrigger size="sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(SORT_LABELS) as MealSort[]).map((key) => (
-                <SelectItem key={key} value={key}>
-                  {SORT_LABELS[key]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <MealSortSelect value={sort} onChange={setSort} />
         </div>
 
         {isPending ? (
@@ -140,25 +115,7 @@ export default function AddMeal() {
           <ul className="flex flex-col gap-2 overflow-y-auto">
             {meals.map((meal) => (
               <li key={meal.id}>
-                <button
-                  type="button"
-                  onClick={() => addToToday(meal)}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl bg-muted/50 p-3 text-left transition-colors hover:bg-muted"
-                >
-                  <div className="min-w-0">
-                    <div className="truncate font-medium">{meal.name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {meal.proteinG}g protein · {meal.carbsG}g carbs ·{" "}
-                      {meal.fatG}g fat
-                    </div>
-                  </div>
-                  <div className="shrink-0 text-sm whitespace-nowrap">
-                    <span className="font-bold">
-                      {meal.calories.toLocaleString()}
-                    </span>
-                    <span className="text-muted-foreground"> kcal</span>
-                  </div>
-                </button>
+                <MealRow meal={meal} onSelect={addToToday} />
               </li>
             ))}
 
