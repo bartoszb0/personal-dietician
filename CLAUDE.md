@@ -59,7 +59,7 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
    - Goal-hit: a day is a **hit** when **both** of these hold for that day's totals vs the target active that day: (a) **calories within ±10%** — no more than 10% under and no more than 10% over; (b) **protein at or above target** — protein is a floor with no upper bound (more protein never fails a day). **Carbs and fat do NOT affect the hit** — missing them never fails the day (they're guidance, not gates). A streak is the run of consecutive hit days; the calendar shows per-day hit/miss.
    - Both must be exhaustively unit-tested (formula correctness, the calorie ±10% boundaries both directions, protein exactly at target and just under, carbs/fat ignored, empty days, goal caps, macro splits, day-boundary/timezone handling).
 
-2. **Meals and logging.** A `Meal` is user-created: a name plus its calories/macros, **entered manually**. It may optionally carry free-text "how to make it" instructions and an optional list of products with quantities — but those are reference metadata only; the meal's macros are the user-entered totals and are NOT auto-computed from the products (auto-deriving macros would be recipe-engine territory, out of scope). `DailyLogEntry` = one thing eaten on a day; it references **either** a saved `Meal` **or** a scanned `Product`, and stores a **snapshot** of the calories/macros it contributed, so editing or deleting a meal later never rewrites past days. Today's counter = sum of today's entries.
+2. **Meals and logging.** A `Meal` is user-created: a name plus its calories/macros, **entered manually**. It may optionally carry free-text `ingredients` and `recipe` fields (both plain strings, no link to `Product`) — but those are reference metadata only; the meal's macros are the user-entered totals and are NOT auto-computed from the ingredients (auto-deriving macros would be recipe-engine territory, out of scope). `DailyLogEntry` = one thing eaten on a day; it references **either** a saved `Meal` **or** a scanned `Product`, and stores a **snapshot** of the calories/macros it contributed, so editing or deleting a meal later never rewrites past days. Today's counter = sum of today's entries.
 
 3. **Versioned nutrition targets.** `NutritionTarget` rows have `effectiveFrom` and are never overwritten. A day's hit/miss and the calendar always compare against the target active on that day, so changing your target today leaves past calendar days judged as they were. Weight is a simple `weightKg` column on `Profile` (decided against a WeightLog history table for v1). Store `birthDate`, not age.
 
@@ -78,8 +78,7 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
 - `User`, `Profile` (sex, birthDate, heightCm, weightKg, activityLevel, goal, dietType enum, onboardingCompletedAt) — 1:1, `Profile` nullable until onboarding starts.
 - `NutritionTarget` (versioned — `effectiveFrom`, `calories`, `proteinG`, `fatG`, `carbsG`, `isCustom`; never updated in place).
 - `Product` (normalized from OFF/USDA, cached).
-- `Meal` (user-created: name, calories, proteinG, carbsG, fatG, optional `instructions`).
-- `MealProduct` (optional join: mealId, productId, quantity — reference only, does not drive meal macros).
+- `Meal` (user-created: name, calories, proteinG, carbsG, fatG, optional free-text `ingredients` + `recipe` strings; no product link in v1).
 - `DailyLogEntry` (userId, date, nullable `mealId` **or** nullable `productId`, servings/amount, snapshot of contributed calories/macros).
 - `Subscription`, plus an AI usage metering table.
 - Staples/excluded lists (`FavoriteItem` etc.) feed AI suggestions once that feature lands.
@@ -88,7 +87,7 @@ Streaks and calendar hit/miss are **computed** from `DailyLogEntry` vs `Nutritio
 
 ## Explicitly OUT OF SCOPE for v1
 
-External recipe import; auto-calculating recipes (macros summed/scaled from ingredients — meals use user-entered totals only); social features; photo food recognition; workout tracking; full-week meal plans generated at once. User-created meals with optional instructions and an optional product list ARE in scope.
+External recipe import; auto-calculating recipes (macros summed/scaled from ingredients — meals use user-entered totals only); social features; photo food recognition; workout tracking; full-week meal plans generated at once. User-created meals with optional free-text `ingredients` and `recipe` ARE in scope.
 
 **Refuse scope creep**: if a request drifts into these, remind the user it's out of scope for v1 before doing anything.
 
