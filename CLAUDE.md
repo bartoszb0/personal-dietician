@@ -9,13 +9,13 @@ A personal diet companion — a greenfield full-stack portfolio project (the aut
 What a user does:
 
 1. **Onboard** → the backend computes deterministic calorie/macro targets from their body stats and goal.
-2. **Build a dish library** → they add dishes they eat (name + the calories/macros they enter themselves), reusable day to day.
-3. **Log each day** → for each thing eaten they either pick a saved dish or scan a product barcode; it adds to today's running total against target.
+2. **Build a meal library** → they add meals they eat (name + the calories/macros they enter themselves), reusable day to day.
+3. **Log each day** → for each thing eaten they either pick a saved meal or scan a product barcode; it adds to today's running total against target.
 4. **Stay consistent** → hitting the day's calorie + protein goal builds a streak; a calendar shows which days were hit or missed.
 
 AI is a **secondary, optional** feature (see decision 7), not the centre of the app. The heart of the product is the deterministic targets + logging + streak loop.
 
-**Core loop (build priority #1):** onboard → get targets → build dish library → log food (saved dish or scanned product) against today's target → streak/calendar feedback. Get this working end to end before anything else.
+**Core loop (build priority #1):** onboard → get targets → build meal library → log food (saved meal or scanned product) against today's target → streak/calendar feedback. Get this working end to end before anything else.
 
 ## Repo structure
 
@@ -24,7 +24,7 @@ Single repo, two independent folders (no workspace tooling — each has its own 
 - `frontend/` — React 19 SPA (Vite, TypeScript strict). Scaffolded, minimal.
 - `backend/` — NestJS + PostgreSQL + **Prisma 7** (do not use TypeORM). Scaffolded: auth, prisma, profile modules exist.
 
-Backend module layout (existing + planned): `auth` (done — cookie JWT), `prisma` (done — global), `profile` (in progress), `nutrition` (calculator — planned), `food` (OFF/USDA providers + product cache — planned), `dish`, `log` (daily entries + streak/calendar — planned), `billing` (Stripe — planned).
+Backend module layout (existing + planned): `auth` (done — cookie JWT), `prisma` (done — global), `profile` (in progress), `nutrition` (calculator — planned), `food` (OFF/USDA providers + product cache — planned), `meal`, `log` (daily entries + streak/calendar — planned), `billing` (Stripe — planned).
 
 ## Commands
 
