@@ -7,12 +7,14 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { UserPayload } from '../common/types/user-payload.type';
 import { CreateMealDto } from './dto/create-meal.dto';
+import { FindMealsDto } from './dto/find-meals.dto';
 import { UpdateMealDto } from './dto/update-meal.dto';
 import { MealsService } from './meals.service';
 
@@ -27,8 +29,8 @@ export class MealsController {
   }
 
   @Get()
-  findAll(@CurrentUser() user: UserPayload) {
-    return this.mealsService.findAll(user.id);
+  findAll(@CurrentUser() user: UserPayload, @Query() query: FindMealsDto) {
+    return this.mealsService.findAll(user.id, query);
   }
 
   @Get(':id')
