@@ -4,3 +4,10 @@ export type NutritionTarget = {
   carbsG: number
   fatG: number
 }
+
+export type UserNutritionTarget = NutritionTarget & {
+  id: string
+  userId: string
+  isCustom: boolean
+  effectiveFrom: string
+}
