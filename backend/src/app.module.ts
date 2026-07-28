@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
+import { MealsModule } from './meals/meals.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { ProfileModule } from './profile/profile.module';
     AuthModule,
     ProfileModule,
     NutritionModule,
+    MealsModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
