@@ -10,13 +10,18 @@ import { NutritionService } from './nutrition.service';
 export class NutritionController {
   constructor(private readonly nutritionService: NutritionService) {}
 
+  @Post('preview')
+  previewTarget(@Body() dto: PreviewTargetDto) {
+    return this.nutritionService.computeTargets(dto);
+  }
+
   @Get('target')
   getCurrentTarget(@CurrentUser() user: UserPayload) {
     return this.nutritionService.getCurrentTarget(user.id);
   }
 
-  @Post('preview')
-  previewTarget(@Body() dto: PreviewTargetDto) {
-    return this.nutritionService.computeTargets(dto);
+  @Get('consumed')
+  getConsumedNutrition(@CurrentUser() user: UserPayload) {
+    return this.nutritionService.getConsumedNutrition(user.id);
   }
 }

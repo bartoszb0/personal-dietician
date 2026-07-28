@@ -33,4 +33,8 @@ export class NutritionService {
       orderBy: { effectiveFrom: 'desc' },
     });
   }
+
+  getConsumedNutrition(userId: string) {
+    return { consumed: 'todo' };
+  }
 }
