@@ -5,7 +5,7 @@ import { DashboardLayout } from "./components/common/DashboardLayout"
 import { ProtectedRoute } from "./components/common/ProtectedRoute"
 import { RedirectIfOnboarded } from "./components/common/RedirectIfOnboarded"
 import { RequireOnboarding } from "./components/common/RequireOnboarding"
-import Calendar from "./pages/dashboard/calendar/Calendar"
+import StreakCalendar from "./pages/dashboard/calendar/StreakCalendar"
 import Meals from "./pages/dashboard/meals/Meals"
 import Profile from "./pages/dashboard/profile/Profile"
 import Scanner from "./pages/dashboard/scanner/Scanner"
@@ -30,7 +30,7 @@ export function App() {
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<Today />} />
               <Route path="/meals" element={<Meals />} />
-              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/calendar" element={<StreakCalendar />} />
               <Route path="/scanner" element={<Scanner />} />
               <Route path="/profile" element={<Profile />} />
             </Route>
