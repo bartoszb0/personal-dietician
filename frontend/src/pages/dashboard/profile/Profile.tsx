@@ -5,6 +5,7 @@ import { getCurrentNutritionTarget } from "@/api/nutrition"
 import { getProfileData } from "@/api/profile"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import LogoutBtn from "@/components/common/LogoutBtn"
+import ThemeToggle from "@/components/common/ThemeToggle"
 
 import AccountCard from "./components/AccountCard"
 import DailyTargets from "./components/DailyTarget"
@@ -32,6 +33,7 @@ export default function Profile() {
       <AccountCard email={me.email} />
       <ProfileDetails profile={profile} />
       <DailyTargets target={target} />
+      <ThemeToggle />
       <LogoutBtn />
     </div>
   )
