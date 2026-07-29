@@ -94,18 +94,14 @@ model DailyLogEntry {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // the day it counts toward (local calendar date, sent by the client)
   date DateTime @db.Date
 
-  // provenance — which meal it came from. SetNull so deleting a meal keeps the
-  // entry (its macros are snapshotted below, so history is preserved).
   mealId String?
   meal   Meal?   @relation(fields: [mealId], references: [id], onDelete: SetNull)
 
   servings Decimal @db.Decimal(5, 2) @default(1)
 
-  // snapshot copied at log time (meal macros × servings) — the source of truth
-  // for daily totals, so editing/deleting a meal never rewrites past days.
+  name     String
   calories Int
   proteinG Int
   fatG     Int
