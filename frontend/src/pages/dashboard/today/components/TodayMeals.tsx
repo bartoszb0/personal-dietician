@@ -1,19 +1,9 @@
-import { getDayLogs } from "@/api/log"
-import { useQuery } from "@tanstack/react-query"
+import type { DailyLogEntry } from "@/types/log"
 
-import LoadingSpinner from "@/components/common/LoadingSpinner"
-import { toISODate } from "@/lib/date"
 import AddMeal from "./AddMeal"
 import MealRow from "./MealRow"
 
-export default function TodayMeals() {
-  const date = new Date()
-
-  const { data, isPending, isError } = useQuery({
-    queryKey: ["day-log", toISODate(date)],
-    queryFn: () => getDayLogs(date),
-  })
-
+export default function TodayMeals({ meals }: { meals: DailyLogEntry[] }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center justify-between">
@@ -21,21 +11,13 @@ export default function TodayMeals() {
         <AddMeal />
       </div>
 
-      {isPending ? (
-        <div className="mt-8 flex justify-center">
-          <LoadingSpinner />
-        </div>
-      ) : isError ? (
-        <p className="mt-8 text-center text-sm text-destructive">
-          Couldn't load today's meals.
-        </p>
-      ) : data.meals.length === 0 ? (
+      {meals.length === 0 ? (
         <p className="mt-8 text-center text-sm text-muted-foreground">
           No meals yet.
         </p>
       ) : (
         <div className="mt-4 flex flex-col gap-2">
-          {data.meals.map((meal) => (
+          {meals.map((meal) => (
             <MealRow
               key={meal.id}
               meal={meal}
