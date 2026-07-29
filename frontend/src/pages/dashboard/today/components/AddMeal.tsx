@@ -23,6 +23,7 @@ import { MEALS_PAGE_SIZE } from "@/constants/meals"
 import type { Meal, MealSort } from "@/types/meal"
 
 import { addMealLog } from "@/api/log"
+import { toISODate } from "@/lib/date"
 import { toastApiError } from "@/lib/toast-api-error"
 import MealRow from "./MealRow"
 
@@ -71,7 +72,9 @@ export default function AddMeal() {
   const addToToday = async (meal: Meal) => {
     try {
       await addMealLog(meal.id)
-      await queryClient.invalidateQueries({ queryKey: ["today-logs"] })
+      await queryClient.invalidateQueries({
+        queryKey: ["day-log", toISODate(new Date())],
+      })
       toast.success(`Added ${meal.name} to today`)
       setOpen(false)
     } catch (e) {
