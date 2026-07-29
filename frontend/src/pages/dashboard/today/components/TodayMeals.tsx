@@ -2,13 +2,16 @@ import { getDayLogs } from "@/api/log"
 import { useQuery } from "@tanstack/react-query"
 
 import LoadingSpinner from "@/components/common/LoadingSpinner"
+import { toISODate } from "@/lib/date"
 import AddMeal from "./AddMeal"
 import MealRow from "./MealRow"
 
 export default function TodayMeals() {
+  const date = new Date()
+
   const { data, isPending, isError } = useQuery({
-    queryKey: ["today-logs"],
-    queryFn: () => getDayLogs(new Date()),
+    queryKey: ["day-log", toISODate(date)],
+    queryFn: () => getDayLogs(date),
   })
 
   return (
@@ -26,13 +29,13 @@ export default function TodayMeals() {
         <p className="mt-8 text-center text-sm text-destructive">
           Couldn't load today's meals.
         </p>
-      ) : data.length === 0 ? (
+      ) : data.meals.length === 0 ? (
         <p className="mt-8 text-center text-sm text-muted-foreground">
           No meals yet.
         </p>
       ) : (
         <div className="mt-4 flex flex-col gap-2">
-          {data.map((meal) => (
+          {data.meals.map((meal) => (
             <MealRow
               key={meal.id}
               meal={meal}
