@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { seconds, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
+import { LogModule } from './log/log.module';
 import { NutritionModule } from './nutrition/nutrition.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProfileModule } from './profile/profile.module';
@@ -15,6 +16,7 @@ import { MealsModule } from './meals/meals.module';
     ProfileModule,
     NutritionModule,
     MealsModule,
+    LogModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
