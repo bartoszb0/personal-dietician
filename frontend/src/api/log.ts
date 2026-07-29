@@ -16,3 +16,8 @@ export async function getDayLogs(date: Date): Promise<DailyLog> {
   })
   return data
 }
+
+export async function removeLog(id: string) {
+  const { data } = await api.delete(`/log/${id}`)
+  return data
+}
