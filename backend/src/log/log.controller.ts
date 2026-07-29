@@ -12,6 +12,7 @@ import {
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { UserPayload } from '../common/types/user-payload.type';
+import { CalendarQueryDto } from './dto/calendar-query.dto';
 import { CreateLogDto } from './dto/create-log.dto';
 import { LogService } from './log.service';
 
@@ -28,6 +29,14 @@ export class LogController {
   @Get('')
   getDayLogs(@Query('date') date: string, @CurrentUser() user: UserPayload) {
     return this.logService.getDayLogs(date, user.id);
+  }
+
+  @Get('calendar')
+  getCalendar(
+    @Query() query: CalendarQueryDto,
+    @CurrentUser() user: UserPayload,
+  ) {
+    return this.logService.getCalendar(user.id, query.month);
   }
 
   // @Get(':id')

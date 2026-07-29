@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MealsService } from '../meals/meals.service';
+import { isGoalHit } from '../nutrition/goal-hit';
+import { NutritionService } from '../nutrition/nutrition.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLogDto } from './dto/create-log.dto';
 
@@ -8,6 +10,7 @@ export class LogService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mealsService: MealsService,
+    private readonly nutritionService: NutritionService,
   ) {}
 
   async create(createLogDto: CreateLogDto, userId: string) {
@@ -45,7 +48,44 @@ export class LogService {
       { calories: 0, proteinG: 0, fatG: 0, carbsG: 0 },
     );
 
-    return { meals, nutrition };
+    const target = await this.nutritionService.getCurrentTarget(userId);
+    const hitGoal = target ? isGoalHit(nutrition, target) : false;
+
+    return { meals, nutrition, hitGoal };
+  }
+
+  async getCalendar(userId: string, month: string) {
+    const [year, mon] = month.split('-').map(Number);
+    const from = new Date(Date.UTC(year, mon - 1, 1));
+    const to = new Date(Date.UTC(year, mon, 0)); // last day of the month
+
+    const grouped = await this.prisma.dailyLogEntry.groupBy({
+      by: ['date'],
+      where: { userId, date: { gte: from, lte: to } },
+      _sum: { calories: true, proteinG: true },
+    });
+
+    const targets = await this.prisma.nutritionTarget.findMany({
+      where: { userId, effectiveFrom: { lte: to } },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+
+    return grouped.map((g) => {
+      const dayStr = g.date.toISOString().slice(0, 10);
+      const target = targets.find(
+        (t) => t.effectiveFrom.toISOString().slice(0, 10) <= dayStr,
+      );
+      const hit =
+        !!target &&
+        isGoalHit(
+          {
+            calories: g._sum.calories ?? 0,
+            proteinG: g._sum.proteinG ?? 0,
+          },
+          target,
+        );
+      return { date: dayStr, hit };
+    });
   }
 
   async remove(id: string, userId: string) {
