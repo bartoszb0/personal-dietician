@@ -7,7 +7,7 @@ import { toastApiError } from "@/lib/toast-api-error"
 import { useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import AddMeal from "./AddMeal"
-import MealRow from "./MealRow"
+import MealEntryRow from "./MealEntryRow"
 
 export default function TodayMeals({ meals }: { meals: DailyLogEntry[] }) {
   const queryClient = useQueryClient()
@@ -39,7 +39,7 @@ export default function TodayMeals({ meals }: { meals: DailyLogEntry[] }) {
         <div className="mt-4 flex flex-col gap-2">
           {meals.map((meal) => (
             <SwipeToDelete key={meal.id} onDelete={() => handleRemove(meal.id)}>
-              <MealRow meal={meal} onSelect={() => console.log(meal.id)} />
+              <MealEntryRow entry={meal} />
             </SwipeToDelete>
           ))}
         </div>
