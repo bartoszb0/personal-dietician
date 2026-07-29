@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 
+import DayLogDetails from "./DayLogDetails"
+
 export default function StreakCalendar() {
-  const [date, setDate] = useState<Date | undefined>(
-    new Date(new Date().getFullYear(), 1, 12)
-  )
+  const [date, setDate] = useState<Date | undefined>(new Date())
   const [currentMonth, setCurrentMonth] = useState<Date>(
     new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   )
@@ -43,7 +43,7 @@ export default function StreakCalendar() {
   }
 
   return (
-    <div className="mt-2 flex flex-col justify-center">
+    <div className="mx-auto flex w-full max-w-md flex-col p-6">
       <Calendar
         mode="single"
         selected={date}
@@ -52,7 +52,7 @@ export default function StreakCalendar() {
         onMonthChange={setCurrentMonth}
         fixedWeeks
         weekStartsOn={1}
-        className="w-sm p-0 [--cell-size:--spacing(9.5)]"
+        className="w-full p-0"
         components={{
           DayButton: ({ children, modifiers, day, ...props }) => {
             // Skip on selected — its own highlight owns the cell.
@@ -77,9 +77,8 @@ export default function StreakCalendar() {
           },
         }}
       />
-      <h1>Legend here</h1>
-      <h1>Current streak: </h1>
-      <h1>Longest streak:</h1>
+
+      {date && <DayLogDetails date={date} />}
     </div>
   )
 }
