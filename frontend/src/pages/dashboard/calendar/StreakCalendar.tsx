@@ -25,9 +25,19 @@ export default function StreakCalendar() {
     return map
   }, [days])
 
-  const getDayStatus = (date: Date, outside: boolean): "hit" | "miss" | null => {
+  const todayKey = toISODate(new Date())
+
+  const getDayStatus = (
+    date: Date,
+    outside: boolean
+  ): "hit" | "miss" | "today" | null => {
     if (outside) return null
-    const hit = hitByDate.get(toISODate(date))
+    const key = toISODate(date)
+    const hit = hitByDate.get(key)
+
+    // today is still in progress — never a red "miss" until the day is over
+    if (key === todayKey) return hit ? "hit" : "today"
+
     if (hit === undefined) return null // no entries logged that day
     return hit ? "hit" : "miss"
   }
@@ -57,7 +67,8 @@ export default function StreakCalendar() {
                 className={cn(
                   "rounded-full",
                   status === "hit" && "ring-2 ring-emerald-500/60 ring-inset",
-                  status === "miss" && "ring-2 ring-destructive/60 ring-inset"
+                  status === "miss" && "ring-2 ring-destructive/60 ring-inset",
+                  status === "today" && "ring-2 ring-primary/60 ring-inset"
                 )}
               >
                 {children}
