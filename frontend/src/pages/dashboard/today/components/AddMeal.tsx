@@ -1,4 +1,8 @@
-import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query"
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 import { Plus, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -25,6 +29,7 @@ import MealRow from "./MealRow"
 const PAGE_SIZE = MEALS_PAGE_SIZE
 
 export default function AddMeal() {
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -66,6 +71,7 @@ export default function AddMeal() {
   const addToToday = async (meal: Meal) => {
     try {
       await addMealLog(meal.id)
+      await queryClient.invalidateQueries({ queryKey: ["today-logs"] })
       toast.success(`Added ${meal.name} to today`)
       setOpen(false)
     } catch (e) {
