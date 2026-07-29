@@ -34,6 +34,15 @@ export class NutritionService {
     });
   }
 
+  getTargetForDate(userId: string, date: Date) {
+    const dayEnd = new Date(date);
+    dayEnd.setUTCHours(23, 59, 59, 999);
+    return this.prisma.nutritionTarget.findFirst({
+      where: { userId, effectiveFrom: { lte: dayEnd } },
+      orderBy: { effectiveFrom: 'desc' },
+    });
+  }
+
   getConsumedNutrition(userId: string) {
     return { consumed: 'todo' };
   }
