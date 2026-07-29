@@ -35,7 +35,7 @@ export class LogService {
       orderBy: { createdAt: 'asc' },
     });
 
-    const totalNutrition = meals.reduce(
+    const nutrition = meals.reduce(
       (acc, e) => ({
         calories: acc.calories + e.calories,
         proteinG: acc.proteinG + e.proteinG,
@@ -45,7 +45,7 @@ export class LogService {
       { calories: 0, proteinG: 0, fatG: 0, carbsG: 0 },
     );
 
-    return { meals, totalNutrition };
+    return { meals, nutrition };
   }
 
   // findOne(id: number) {
