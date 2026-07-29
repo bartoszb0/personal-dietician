@@ -1,11 +1,17 @@
-import type { Meal } from "@/types/meal"
+type RowItem = {
+  name: string
+  calories: number
+  proteinG: number
+  carbsG: number
+  fatG: number
+}
 
-export default function MealRow({
+export default function MealRow<T extends RowItem>({
   meal,
   onSelect,
 }: {
-  meal: Meal
-  onSelect: (meal: Meal) => void
+  meal: T
+  onSelect: (meal: T) => void
 }) {
   return (
     <button

@@ -1,4 +1,4 @@
-import { getTodayLogs } from "@/api/log"
+import { getDayLogs } from "@/api/log"
 import { useQuery } from "@tanstack/react-query"
 
 import LoadingSpinner from "@/components/common/LoadingSpinner"
@@ -8,7 +8,7 @@ import MealRow from "./MealRow"
 export default function TodayMeals() {
   const { data, isPending, isError } = useQuery({
     queryKey: ["today-logs"],
-    queryFn: () => getTodayLogs(),
+    queryFn: () => getDayLogs(new Date()),
   })
 
   return (
