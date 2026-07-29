@@ -48,7 +48,10 @@ export class LogService {
       { calories: 0, proteinG: 0, fatG: 0, carbsG: 0 },
     );
 
-    const target = await this.nutritionService.getCurrentTarget(userId);
+    const target = await this.nutritionService.getTargetForDate(
+      userId,
+      new Date(date),
+    );
     const hitGoal = target ? isGoalHit(nutrition, target) : false;
 
     return { meals, nutrition, hitGoal };
