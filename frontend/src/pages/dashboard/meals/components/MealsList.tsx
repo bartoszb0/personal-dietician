@@ -3,6 +3,7 @@ import { LayoutGrid, List } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { searchMeals } from "@/api/meals"
+import ErrorState from "@/components/common/ErrorState"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import MealSortSelect from "@/components/common/MealSortSelect"
 import { Button } from "@/components/ui/button"
@@ -50,7 +51,7 @@ export default function MealsList({ search }: { search: string }) {
 
   if (isPending) return <LoadingSpinner />
   if (isError) {
-    return <p className="mt-4 text-sm text-destructive">Couldn't load meals.</p>
+    return <ErrorState message="Couldn't load your meals." />
   }
 
   const meals = data.pages.flatMap((page) => page.items)

@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { searchMeals } from "@/api/meals"
+import ErrorState from "@/components/common/ErrorState"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import MealSortSelect from "@/components/common/MealSortSelect"
 import { Button } from "@/components/ui/button"
@@ -119,7 +120,7 @@ export default function AddMeal() {
         {isPending ? (
           <LoadingSpinner />
         ) : isError ? (
-          <p className="text-sm text-destructive">Couldn't load meals.</p>
+          <ErrorState message="Couldn't load meals." />
         ) : meals.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {debouncedSearch
