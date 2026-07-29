@@ -16,4 +16,10 @@ export type DailyLogEntry = {
 export type DailyLog = {
   meals: DailyLogEntry[]
   nutrition: NutritionTarget
+  hitGoal: boolean
+}
+
+export type CalendarDay = {
+  date: string // YYYY-MM-DD
+  hit: boolean
 }

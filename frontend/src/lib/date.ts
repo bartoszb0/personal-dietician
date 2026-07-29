@@ -5,6 +5,12 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`
 }
 
+export function toMonthParam(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  return `${year}-${month}`
+}
+
 export function parseISODate(value?: string): Date | undefined {
   if (!value) return undefined
   // handle both "YYYY-MM-DD" and full ISO "YYYY-MM-DDT..." (the API returns the latter)

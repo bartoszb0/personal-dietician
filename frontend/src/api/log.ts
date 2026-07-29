@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
 import { toISODate } from "@/lib/date"
-import type { DailyLog } from "@/types/log"
+import type { CalendarDay, DailyLog } from "@/types/log"
 
 export async function addMealLog(mealId: string) {
   const { data } = await api.post("/log", {
@@ -19,5 +19,12 @@ export async function getDayLogs(date: Date): Promise<DailyLog> {
 
 export async function removeLog(id: string) {
   const { data } = await api.delete(`/log/${id}`)
+  return data
+}
+
+export async function getCalendar(month: string): Promise<CalendarDay[]> {
+  const { data } = await api.get<CalendarDay[]>("/log/calendar", {
+    params: { month },
+  })
   return data
 }
