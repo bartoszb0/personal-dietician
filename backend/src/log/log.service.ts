@@ -29,11 +29,23 @@ export class LogService {
     });
   }
 
-  getDayLogs(date: string, userId: string) {
-    return this.prisma.dailyLogEntry.findMany({
+  async getDayLogs(date: string, userId: string) {
+    const meals = await this.prisma.dailyLogEntry.findMany({
       where: { userId: userId, date: new Date(date) },
       orderBy: { createdAt: 'asc' },
     });
+
+    const totalNutrition = meals.reduce(
+      (acc, e) => ({
+        calories: acc.calories + e.calories,
+        proteinG: acc.proteinG + e.proteinG,
+        fatG: acc.fatG + e.fatG,
+        carbsG: acc.carbsG + e.carbsG,
+      }),
+      { calories: 0, proteinG: 0, fatG: 0, carbsG: 0 },
+    );
+
+    return { meals, totalNutrition };
   }
 
   // findOne(id: number) {

@@ -1,3 +1,5 @@
+import type { NutritionTarget } from "./nutrition"
+
 export type DailyLogEntry = {
   id: string
   name: string
@@ -9,4 +11,9 @@ export type DailyLogEntry = {
   date: string
   mealId: string | null
   createdAt: string
+}
+
+export type DailyLog = {
+  meals: DailyLogEntry[]
+  nutrition: NutritionTarget
 }

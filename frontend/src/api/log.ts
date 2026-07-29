@@ -1,6 +1,6 @@
 import { api } from "@/lib/api"
 import { toISODate } from "@/lib/date"
-import type { DailyLogEntry } from "@/types/log"
+import type { DailyLog } from "@/types/log"
 
 export async function addMealLog(mealId: string) {
   const { data } = await api.post("/log", {
@@ -10,8 +10,8 @@ export async function addMealLog(mealId: string) {
   return data
 }
 
-export async function getDayLogs(date: Date): Promise<DailyLogEntry[]> {
-  const { data } = await api.get<DailyLogEntry[]>("/log", {
+export async function getDayLogs(date: Date): Promise<DailyLog> {
+  const { data } = await api.get<DailyLog>("/log", {
     params: { date: toISODate(date) },
   })
   return data
