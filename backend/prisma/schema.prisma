@@ -15,6 +15,7 @@ model User {
   profile          Profile?
   nutritionTargets NutritionTarget[]
   meals            Meal[]
+  logEntries       DailyLogEntry[]
 }
 
 enum Sex {
@@ -80,8 +81,37 @@ model Meal {
   ingredients String?
   recipe      String?
 
+  logEntries DailyLogEntry[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model DailyLogEntry {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // the day it counts toward (local calendar date, sent by the client)
+  date DateTime @db.Date
+
+  // provenance — which meal it came from. SetNull so deleting a meal keeps the
+  // entry (its macros are snapshotted below, so history is preserved).
+  mealId String?
+  meal   Meal?   @relation(fields: [mealId], references: [id], onDelete: SetNull)
+
+  servings Decimal @db.Decimal(5, 2) @default(1)
+
+  // snapshot copied at log time (meal macros × servings) — the source of truth
+  // for daily totals, so editing/deleting a meal never rewrites past days.
+  calories Int
+  proteinG Int
+  fatG     Int
+  carbsG   Int
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
 }
