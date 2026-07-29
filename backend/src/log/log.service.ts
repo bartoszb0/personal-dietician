@@ -32,6 +32,7 @@ export class LogService {
   getDayLogs(date: string, userId: string) {
     return this.prisma.dailyLogEntry.findMany({
       where: { userId: userId, date: new Date(date) },
+      orderBy: { createdAt: 'asc' },
     });
   }
 
