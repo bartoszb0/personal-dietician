@@ -20,3 +20,8 @@ export async function createMeal(input: MealValues): Promise<Meal> {
   const { data } = await api.post<Meal>("/meals", input)
   return data
 }
+
+export async function getMeal(id: string): Promise<Meal> {
+  const { data } = await api.get<Meal>(`/meals/${id}`)
+  return data
+}
