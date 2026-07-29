@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils"
 import type { MealSort } from "@/types/meal"
 
 import MealCard, { type MealView } from "./MealCard"
+import MealDialog from "./MealDialog"
 
 const PAGE_SIZE = MEALS_PAGE_SIZE
 
@@ -102,13 +103,17 @@ export default function MealsList({ search }: { search: string }) {
           {view === "grid" ? (
             <div className="grid grid-cols-2 gap-3">
               {meals.map((meal) => (
-                <MealCard key={meal.id} meal={meal} view="grid" />
+                <MealDialog key={meal.id} meal={meal}>
+                  <MealCard meal={meal} view="grid" />
+                </MealDialog>
               ))}
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {meals.map((meal) => (
-                <MealCard key={meal.id} meal={meal} view="list" />
+                <MealDialog key={meal.id} meal={meal}>
+                  <MealCard meal={meal} view="list" />
+                </MealDialog>
               ))}
             </div>
           )}
