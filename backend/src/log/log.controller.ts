@@ -1,42 +1,32 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
-import { LogService } from './log.service';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import type { UserPayload } from '../common/types/user-payload.type';
 import { CreateLogDto } from './dto/create-log.dto';
-import { UpdateLogDto } from './dto/update-log.dto';
+import { LogService } from './log.service';
 
 @Controller('log')
+@UseGuards(JwtGuard)
 export class LogController {
   constructor(private readonly logService: LogService) {}
 
   @Post()
-  create(@Body() createLogDto: CreateLogDto) {
-    return this.logService.create(createLogDto);
+  create(@Body() createLogDto: CreateLogDto, @CurrentUser() user: UserPayload) {
+    return this.logService.create(createLogDto, user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.logService.findAll();
+  @Get('')
+  getDayLogs(@Query('date') date: string, @CurrentUser() user: UserPayload) {
+    return this.logService.getDayLogs(date, user.id);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.logService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.logService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateLogDto: UpdateLogDto) {
-    return this.logService.update(+id, updateLogDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.logService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.logService.remove(+id);
+  // }
 }
