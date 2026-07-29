@@ -7,7 +7,6 @@ import { searchMeals } from "@/api/meals"
 import LoadingSpinner from "@/components/common/LoadingSpinner"
 import MealSortSelect from "@/components/common/MealSortSelect"
 import { Button } from "@/components/ui/button"
-import { MEALS_PAGE_SIZE } from "@/constants/meals"
 import {
   Dialog,
   DialogContent,
@@ -16,8 +15,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { MEALS_PAGE_SIZE } from "@/constants/meals"
 import type { Meal, MealSort } from "@/types/meal"
 
+import { addMealLog } from "@/api/log"
+import { toastApiError } from "@/lib/toast-api-error"
 import MealRow from "./MealRow"
 
 const PAGE_SIZE = MEALS_PAGE_SIZE
@@ -61,10 +63,14 @@ export default function AddMeal() {
 
   const meals = data?.pages.flatMap((page) => page.items) ?? []
 
-  const addToToday = (meal: Meal) => {
-    // TODO: persist to today's log once daily logging (DailyLogEntry) exists.
-    toast.success(`Added ${meal.name} to today`)
-    setOpen(false)
+  const addToToday = async (meal: Meal) => {
+    try {
+      await addMealLog(meal.id)
+      toast.success(`Added ${meal.name} to today`)
+      setOpen(false)
+    } catch (e) {
+      toastApiError(e)
+    }
   }
 
   return (
