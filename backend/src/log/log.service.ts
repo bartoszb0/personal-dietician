@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MealsService } from '../meals/meals.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLogDto } from './dto/create-log.dto';
@@ -48,15 +48,18 @@ export class LogService {
     return { meals, nutrition };
   }
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} log`;
-  // }
+  async remove(id: string, userId: string) {
+    const log = await this.prisma.dailyLogEntry.findFirst({
+      where: { id: id, userId: userId },
+    });
 
-  // update(id: number, updateLogDto: UpdateLogDto) {
-  //   return `This action updates a #${id} log`;
-  // }
+    if (!log) throw new NotFoundException('Could not find this log');
 
-  // remove(id: number) {
-  //   return `This action removes a #${id} log`;
-  // }
+    return this.prisma.dailyLogEntry.delete({
+      where: {
+        id: log.id,
+        userId: userId,
+      },
+    });
+  }
 }
