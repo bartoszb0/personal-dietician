@@ -25,3 +25,7 @@ export async function getMeal(id: string): Promise<Meal> {
   const { data } = await api.get<Meal>(`/meals/${id}`)
   return data
 }
+
+export async function deleteMeal(id: string): Promise<void> {
+  await api.delete(`/meals/${id}`)
+}
