@@ -1,29 +1,9 @@
-import {
-  IsDateString,
-  IsEnum,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-} from 'class-validator';
-import { ActivityLevel, Goal, Sex } from '../../../generated/prisma/enums';
+import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { ActivityLevel, Goal } from '../../../generated/prisma/enums';
 
+// Only the fields settings can change. sex/birthDate are immutable identity and
+// heightCm rarely changes — the whitelist pipe strips anything else.
 export class UpdateProfileDto {
-  @IsOptional()
-  @IsEnum(Sex)
-  sex?: Sex;
-
-  @IsOptional()
-  @IsDateString()
-  birthDate?: string;
-
-  @IsOptional()
-  @IsInt()
-  @Min(100)
-  @Max(250)
-  heightCm?: number;
-
   @IsOptional()
   @IsNumber()
   @Min(30)

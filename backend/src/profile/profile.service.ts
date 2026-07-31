@@ -44,16 +44,29 @@ export class ProfileService {
     });
   }
 
-  async upsertProfile(userId: string, dto: UpdateProfileDto) {
-    const data = {
-      ...dto,
-      ...(dto.birthDate ? { birthDate: new Date(dto.birthDate) } : {}),
-    };
+  // Edit an existing profile (weight/activity/goal). update — not upsert — so a
+  // non-onboarded user gets a 404 instead of creating a partial profile.
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    return this.prisma.$transaction(async (tx) => {
+      const profile = await tx.profile.update({ where: { userId }, data: dto });
 
-    return this.prisma.profile.upsert({
-      where: { userId },
-      create: { userId, ...data },
-      update: data,
+      // any body-stat/goal change shifts the targets, so version a fresh
+      // NutritionTarget (never overwrite past ones). A profile that exists is
+      // always complete, so the remaining fields come from the stored row.
+      const targets = this.nutrition.computeTargets({
+        sex: profile.sex!,
+        birthDate: profile.birthDate!.toISOString(),
+        heightCm: profile.heightCm!,
+        weightKg: Number(profile.weightKg),
+        activityLevel: profile.activityLevel!,
+        goal: profile.goal!,
+      });
+
+      const nutritionTarget = await tx.nutritionTarget.create({
+        data: { userId, ...targets },
+      });
+
+      return { profile, nutritionTarget };
     });
   }
 }

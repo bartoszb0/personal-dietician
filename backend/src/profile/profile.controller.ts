@@ -29,6 +29,6 @@ export class ProfileController {
     @CurrentUser() user: UserPayload,
     @Body() dto: UpdateProfileDto,
   ) {
-    return this.profileService.upsertProfile(user.id, dto);
+    return this.profileService.updateProfile(user.id, dto);
   }
 }
