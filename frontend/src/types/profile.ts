@@ -13,3 +13,9 @@ export type UserProfile = {
   createdAt: string
   updatedAt: string
 }
+
+export type UpdateProfilePayload = {
+  weightKg?: number
+  activityLevel?: ActivityLevel
+  goal?: Goal
+}
