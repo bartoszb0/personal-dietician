@@ -15,7 +15,6 @@ import {
 import { EllipsisVertical, Scale, Target, Zap } from "lucide-react"
 import { useState } from "react"
 
-import { useLockBodyScroll } from "@/hooks/useLockBodyScroll"
 import UpdateActivityForm from "./UpdateActivityForm"
 import UpdateGoalForm from "./UpdateGoalForm"
 import UpdateWeightForm from "./UpdateWeightForm"
@@ -32,9 +31,6 @@ export default function UpdateDetailsDropdown() {
   ] as const
 
   const ActiveForm = FIELDS.find((f) => f.key === active)?.Form
-
-  // lock the profile page behind the dialog (iOS lets wheel drags scroll it)
-  useLockBodyScroll(active !== null)
 
   return (
     <>
