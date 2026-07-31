@@ -32,7 +32,7 @@ export default function MealEntryRow({ entry }: { entry: DailyLogEntry }) {
     <>
       <MealRow meal={entry} onSelect={() => setOpen(true)} />
       <Dialog open={open} onOpenChange={setOpen}>
-        <MealDialogContent details={details} />
+        <MealDialogContent details={details} mealId={meal?.id} />
       </Dialog>
     </>
   )

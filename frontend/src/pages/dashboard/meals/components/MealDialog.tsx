@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import type { Meal } from "@/types/meal"
+import MealDialogDropdown from "./MealDialogDropdown"
 
 export type MealDetails = {
   name: string
@@ -30,11 +31,20 @@ function Stat({ label, value }: { label: string; value: string }) {
   )
 }
 
-export function MealDialogContent({ details }: { details: MealDetails }) {
+export function MealDialogContent({
+  details,
+  mealId,
+}: {
+  details: MealDetails
+  mealId?: string
+}) {
   return (
     <DialogContent className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>{details.name}</DialogTitle>
+        <div className="flex items-center gap-2">
+          <DialogTitle>{details.name}</DialogTitle>
+          {mealId && <MealDialogDropdown mealId={mealId} />}
+        </div>
         <DialogDescription>Meal details</DialogDescription>
       </DialogHeader>
 
@@ -91,7 +101,7 @@ export default function MealDialog({
       >
         {children}
       </DialogTrigger>
-      <MealDialogContent details={meal} />
+      <MealDialogContent details={meal} mealId={meal.id} />
     </Dialog>
   )
 }
