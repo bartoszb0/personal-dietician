@@ -1,15 +1,19 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { ACTIVITY_OPTIONS } from "@/constants/onboarding/options"
 import { ChoiceCard } from "@/pages/onboarding/components/ChoiceCard"
 import type { ActivityLevel } from "@/types/onboarding"
+import type { UserProfile } from "@/types/profile"
 
 import { useUpdateProfile } from "../../../../hooks/useUpdateProfile"
 
 export default function UpdateActivityForm({ onDone }: { onDone: () => void }) {
-  const [activityLevel, setActivityLevel] =
-    useState<ActivityLevel>("MODERATE")
+  const profile = useQueryClient().getQueryData<UserProfile>(["profile"])
+  const [activityLevel, setActivityLevel] = useState<ActivityLevel>(
+    profile?.activityLevel ?? "MODERATE"
+  )
   const update = useUpdateProfile(onDone)
 
   return (

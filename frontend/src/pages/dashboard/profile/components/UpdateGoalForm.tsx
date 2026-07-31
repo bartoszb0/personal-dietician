@@ -1,14 +1,17 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { GOAL_OPTIONS } from "@/constants/onboarding/options"
 import { ChoiceCard } from "@/pages/onboarding/components/ChoiceCard"
 import type { Goal } from "@/types/onboarding"
+import type { UserProfile } from "@/types/profile"
 
 import { useUpdateProfile } from "../../../../hooks/useUpdateProfile"
 
 export default function UpdateGoalForm({ onDone }: { onDone: () => void }) {
-  const [goal, setGoal] = useState<Goal>("MAINTAIN")
+  const profile = useQueryClient().getQueryData<UserProfile>(["profile"])
+  const [goal, setGoal] = useState<Goal>(profile?.goal ?? "MAINTAIN")
   const update = useUpdateProfile(onDone)
 
   return (
