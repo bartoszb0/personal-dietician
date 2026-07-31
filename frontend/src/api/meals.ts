@@ -26,6 +26,14 @@ export async function getMeal(id: string): Promise<Meal> {
   return data
 }
 
+export async function updateMeal(
+  id: string,
+  input: MealValues
+): Promise<Meal> {
+  const { data } = await api.patch<Meal>(`/meals/${id}`, input)
+  return data
+}
+
 export async function deleteMeal(id: string): Promise<void> {
   await api.delete(`/meals/${id}`)
 }
