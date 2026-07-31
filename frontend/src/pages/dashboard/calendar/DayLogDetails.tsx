@@ -4,7 +4,6 @@ import { getDayLogs } from "@/api/log"
 import ErrorState from "@/components/common/ErrorState"
 import { Spinner } from "@/components/ui/spinner"
 import { toISODate } from "@/lib/date"
-import { cn } from "@/lib/utils"
 
 import MealEntryRow from "../today/components/MealEntryRow"
 
@@ -20,20 +19,26 @@ export default function DayLogDetails({ date }: { date: Date }) {
     month: "long",
   })
 
+  // today is still in progress — never label it a miss until the day is over
+  const isToday = toISODate(date) === toISODate(new Date())
+
   return (
     <div className="mt-6 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <span className="font-medium">{heading}</span>
-        {data && data.meals.length > 0 && (
-          <span
-            className={cn(
-              "text-xs font-medium",
-              data.hitGoal ? "text-emerald-500" : "text-muted-foreground"
-            )}
-          >
-            {data.hitGoal ? "Goal hit" : "Goal missed"}
-          </span>
-        )}
+        {data &&
+          data.meals.length > 0 &&
+          (data.hitGoal ? (
+            <span className="text-xs font-medium text-emerald-500">
+              Goal hit
+            </span>
+          ) : isToday ? (
+            <span className="text-xs font-medium text-primary">In progress</span>
+          ) : (
+            <span className="text-xs font-medium text-muted-foreground">
+              Goal missed
+            </span>
+          ))}
       </div>
 
       {isPending ? (
