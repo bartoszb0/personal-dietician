@@ -4,7 +4,6 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { deleteMeal } from "@/api/meals"
-import ConfirmationDialog from "@/components/common/ConfirmationDIalog"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,9 +12,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { toastApiError } from "@/lib/toast-api-error"
+import type { MealValues } from "@/schemas/mealSchema"
 
-export default function MealDialogDropdown({ mealId }: { mealId: string }) {
+import ConfirmationDialog from "@/components/common/ConfirmationDIalog"
+import EditMeal from "./EditMeal"
+import type { MealDetails } from "./MealDialog"
+
+export default function MealDialogDropdown({
+  mealId,
+  details,
+}: {
+  mealId: string
+  details: MealDetails
+}) {
   const [confirmOpen, setConfirmOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const queryClient = useQueryClient()
 
   const remove = useMutation({
@@ -28,6 +39,16 @@ export default function MealDialogDropdown({ mealId }: { mealId: string }) {
     onError: toastApiError,
   })
 
+  const editDefaults: MealValues = {
+    name: details.name,
+    calories: details.calories,
+    proteinG: details.proteinG,
+    fatG: details.fatG,
+    carbsG: details.carbsG,
+    ingredients: details.ingredients ?? "",
+    recipe: details.recipe ?? "",
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -36,7 +57,10 @@ export default function MealDialogDropdown({ mealId }: { mealId: string }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuGroup>
-            <DropdownMenuItem className="gap-2.5 px-2.5 py-2 text-sm">
+            <DropdownMenuItem
+              className="gap-2.5 px-2.5 py-2 text-sm"
+              onClick={() => setEditOpen(true)}
+            >
               <Pencil className="size-5" />
               Edit
             </DropdownMenuItem>
@@ -50,6 +74,13 @@ export default function MealDialogDropdown({ mealId }: { mealId: string }) {
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <EditMeal
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        mealId={mealId}
+        defaultValues={editDefaults}
+      />
 
       <ConfirmationDialog
         open={confirmOpen}

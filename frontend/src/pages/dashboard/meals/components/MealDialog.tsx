@@ -43,7 +43,7 @@ export function MealDialogContent({
       <DialogHeader>
         <div className="flex items-center gap-2">
           <DialogTitle>{details.name}</DialogTitle>
-          {mealId && <MealDialogDropdown mealId={mealId} />}
+          {mealId && <MealDialogDropdown mealId={mealId} details={details} />}
         </div>
         <DialogDescription>Meal details</DialogDescription>
       </DialogHeader>
