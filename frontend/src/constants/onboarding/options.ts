@@ -65,7 +65,12 @@ const MONTHS = [
 ]
 
 export const HEIGHT_OPTIONS = rangeOptions(120, 220, "cm")
-export const WEIGHT_OPTIONS = rangeOptions(30, 200, "kg")
+
+export const WEIGHT_WHOLE_OPTIONS = numberOptions(30, 300)
+export const WEIGHT_FRACTION_OPTIONS: WheelPickerOption[] = Array.from(
+  { length: 10 },
+  (_, digit) => ({ value: String(digit), label: `.${digit} kg` })
+)
 
 export const DAY_OPTIONS = numberOptions(1, 31)
 export const MONTH_OPTIONS: WheelPickerOption[] = MONTHS.map(

@@ -22,7 +22,7 @@ export default function Onboarding() {
   const [answers, setAnswers] = useState<Answers>({
     birthDate: "2000-01-01",
     heightCm: "175",
-    weightKg: "70",
+    weightKg: "70.0",
   })
   const [nutrition, setNutrtion] = useState<NutritionTarget>()
   const [isLoadingNutrition, setIsLoadingNutrition] = useState(false)
