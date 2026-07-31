@@ -1,9 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ACTIVITY_OPTIONS,
   GOAL_OPTIONS,
@@ -11,6 +6,7 @@ import {
 } from "@/constants/onboarding/options"
 import { formatBirthDate } from "@/lib/date"
 import type { UserProfile } from "@/types/profile"
+import UpdateDetailsDropdown from "./UpdateDetailsDropdown"
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -24,13 +20,15 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function ProfileDetails({ profile }: { profile: UserProfile }) {
   const sex = SEX_OPTIONS.find((o) => o.value === profile.sex)?.label ?? "—"
   const activity =
-    ACTIVITY_OPTIONS.find((o) => o.value === profile.activityLevel)?.label ?? "—"
+    ACTIVITY_OPTIONS.find((o) => o.value === profile.activityLevel)?.label ??
+    "—"
   const goal = GOAL_OPTIONS.find((o) => o.value === profile.goal)?.label ?? "—"
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex items-center justify-between">
         <CardTitle className="text-base">Your details</CardTitle>
+        <UpdateDetailsDropdown />
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         <Row label="Sex" value={sex} />
