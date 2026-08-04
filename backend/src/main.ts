@@ -15,6 +15,8 @@ async function bootstrap() {
       process.env.FRONTEND_URL ?? 'http://localhost:5173',
       // allow the Vite dev server over the LAN (phone testing)
       /^http:\/\/192\.168\.\d+\.\d+:5173$/,
+      // allow ngrok tunnels (HTTPS) for mobile testing with the camera
+      /^https:\/\/[a-z0-9-]+\.ngrok-free\.dev$/,
     ],
     credentials: true,
   });
