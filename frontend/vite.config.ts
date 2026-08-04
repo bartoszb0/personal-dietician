@@ -11,6 +11,15 @@ export default defineConfig({
     // allow the ngrok tunnel host (Vite blocks unknown Host headers). Leading
     // dot matches any subdomain, so new ngrok URLs work without editing this.
     allowedHosts: [".ngrok-free.dev"],
+    // proxy API calls to the backend so the app talks to it same-origin —
+    // no CORS, no mixed content, and the auth cookie works through the tunnel
+    proxy: {
+      "/api": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
   },
   resolve: {
     alias: {

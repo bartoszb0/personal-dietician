@@ -1,9 +1,9 @@
 import axios from "axios"
 
 export const api = axios.create({
-  // default to the same host the app was opened from, so it works on both
-  // localhost (desktop) and the LAN IP (phone) without hardcoding an address
-  baseURL:
-    import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:3001`,
+  // same-origin path — the Vite dev server proxies /api to the backend, so it
+  // works over localhost, the LAN IP, and the ngrok tunnel without CORS or
+  // mixed-content issues. In prod, set VITE_API_URL to the real backend URL.
+  baseURL: import.meta.env.VITE_API_URL ?? "/api",
   withCredentials: true,
 })
