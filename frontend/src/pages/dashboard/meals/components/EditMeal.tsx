@@ -41,7 +41,11 @@ export default function EditMeal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+      <DialogContent
+        forceOverlay
+        className="z-[70]! max-h-[90vh] overflow-y-auto sm:max-w-md"
+        overlayClassName="z-[60]!"
+      >
         <DialogHeader>
           <DialogTitle>Edit meal</DialogTitle>
           <DialogDescription>Update this meal's details.</DialogDescription>

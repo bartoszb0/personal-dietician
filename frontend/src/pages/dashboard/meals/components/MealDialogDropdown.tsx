@@ -14,7 +14,7 @@ import {
 import { toastApiError } from "@/lib/toast-api-error"
 import type { MealValues } from "@/schemas/mealSchema"
 
-import ConfirmationDialog from "@/components/common/ConfirmationDIalog"
+import ConfirmationDialog from "@/components/common/ConfirmationDialog"
 import EditMeal from "./EditMeal"
 import type { MealDetails } from "./MealDialog"
 

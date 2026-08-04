@@ -36,7 +36,12 @@ export default function ConfirmationDialog({
 }: ConfirmationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm" showCloseButton={false}>
+      <DialogContent
+        forceOverlay
+        className="z-[60]! sm:max-w-sm"
+        overlayClassName="z-[60]!"
+        showCloseButton={false}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}

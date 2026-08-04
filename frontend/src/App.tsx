@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
+import { useDialogScrollLock } from "@/lib/useDialogScrollLock"
 import NotFound from "@/pages/NotFound"
 import { DashboardLayout } from "./components/common/DashboardLayout"
 import { ProtectedRoute } from "./components/common/ProtectedRoute"
@@ -15,6 +16,8 @@ import Onboarding from "./pages/onboarding/Onboarding"
 import Register from "./pages/Register"
 
 export function App() {
+  useDialogScrollLock()
+
   return (
     <BrowserRouter>
       <Routes>
