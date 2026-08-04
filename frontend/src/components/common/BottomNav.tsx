@@ -39,7 +39,7 @@ function Tab({
 
 export function BottomNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t bg-background">
+    <nav className="shrink-0 border-t bg-background">
       <div className="relative mx-auto flex h-16 max-w-md items-stretch pb-[env(safe-area-inset-bottom)]">
         <Tab to="/meals" label="Meals" icon={UtensilsCrossed} />
         <Tab to="/scanner" label="Scanner" icon={ScanBarcode} />
