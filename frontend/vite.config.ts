@@ -6,6 +6,9 @@ import { defineConfig } from "vite"
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    host: true, // listen on 0.0.0.0 so the dev server is reachable over the LAN
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
