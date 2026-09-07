@@ -1,9 +1,7 @@
-import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { Throttle, seconds } from '@nestjs/throttler';
-import type { Response } from 'express';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { UserPayload } from '../common/types/user-payload.type';
-import { AUTH_COOKIE_NAME, getCookieOptions } from './auth.constants';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -15,13 +13,10 @@ export class AuthController {
 
   @Post('register')
   @Throttle({ default: { limit: 5, ttl: seconds(60) } })
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async register(@Body() registerDto: RegisterDto) {
     const result = await this.authService.register(registerDto);
-    res.cookie(AUTH_COOKIE_NAME, result.access_token, getCookieOptions());
     return {
+      access_token: result.access_token,
       email: result.email,
       id: result.id,
       isOnboarded: result.isOnboarded,
@@ -30,22 +25,20 @@ export class AuthController {
 
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: seconds(60) } })
-  async login(
-    @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() loginDto: LoginDto) {
     const result = await this.authService.login(loginDto);
-    res.cookie(AUTH_COOKIE_NAME, result.access_token, getCookieOptions());
     return {
+      access_token: result.access_token,
       email: result.email,
       id: result.id,
       isOnboarded: result.isOnboarded,
     };
   }
 
+  // With Bearer tokens logout is client-side (the client drops the token);
+  // the route stays so the existing frontend contract keeps working.
   @Post('logout')
-  logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie(AUTH_COOKIE_NAME, getCookieOptions());
+  logout() {
     return { message: 'Logged out' };
   }
 

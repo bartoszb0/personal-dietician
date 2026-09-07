@@ -24,7 +24,7 @@ Single repo, two independent folders (no workspace tooling — each has its own 
 - `frontend/` — React 19 SPA (Vite, TypeScript strict). Scaffolded, minimal.
 - `backend/` — NestJS + PostgreSQL + **Prisma 7** (do not use TypeORM). Scaffolded: auth, prisma, profile modules exist.
 
-Backend module layout (existing + planned): `auth` (done — cookie JWT), `prisma` (done — global), `profile` (in progress), `nutrition` (calculator — planned), `food` (OFF/USDA providers + product cache — planned), `meal`, `log` (daily entries + streak/calendar — planned), `billing` (Stripe — planned).
+Backend module layout (existing + planned): `auth` (done — Bearer JWT), `prisma` (done — global), `profile` (in progress), `nutrition` (calculator — planned), `food` (OFF/USDA providers + product cache — planned), `meal`, `log` (daily entries + streak/calendar — planned), `billing` (Stripe — planned).
 
 ## Commands
 
@@ -67,7 +67,9 @@ docker compose up -d           # local Postgres (postgres:16, host port 5433)
 
 5. **Onboarding.** Multi-step wizard that collects all answers **client-side** and submits **once** at the end — no per-step server writes (decided against PATCH-per-step; the wizard is short and resume-after-refresh isn't worth the complexity). A single `POST /profile/complete` receives the full set, validates it (all fields required, sanity ranges: height 100–250 cm, weight 30–300 kg, plausible age), then in **one transaction** creates the `Profile` with `onboardingCompletedAt` set, computes the first `NutritionTarget`, and returns both. Because the Profile is created only at completion, "profile exists" ≈ "onboarded". Users can override computed targets (`isCustom` flag). A guard redirects users without a completed profile back to the wizard; endpoints that require a finished profile also enforce it server-side. `GET /profile` returns the profile or `null` (null = not onboarded). `PATCH /profile` (partial upsert) is reserved for later profile editing in settings, not used during onboarding.
 
-6. **Auth (already built — do NOT rebuild).** Cookie-based JWT lives in `backend/src/auth`: register/login/logout/me, a `JwtGuard` + passport strategy that reads the token from an httpOnly `access_token` cookie, throttled auth routes. Reuse this; do not scaffold new auth.
+6. **Auth (already built — do NOT rebuild).** Bearer-token JWT lives in `backend/src/auth`: register/login/logout/me, a `JwtGuard` + passport strategy that reads the token via `ExtractJwt.fromAuthHeaderAsBearerToken()`, throttled auth routes. Reuse this; do not scaffold new auth.
+   - **Why not cookies:** the frontend (Vercel) and backend (Render) sit on different domains, so an auth cookie is third-party and is blocked by Safari/iOS ITP and Chrome incognito even when issued `Secure; SameSite=None`. Migrated to `Authorization: Bearer` in Sept 2026 — do not revert without a custom domain covering both.
+   - `POST /auth/login` and `/auth/register` return `{ access_token, id, email, isOnboarded }`. The frontend stores the token in `localStorage` (`frontend/src/lib/auth-token.ts`) and an axios request interceptor in `src/lib/api.ts` attaches the header; a response interceptor clears the token and redirects to `/login` on a 401 — except on login/register itself, where a 401 just means bad credentials. `POST /auth/logout` is a no-op 200; logout is client-side.
 
 7. **AI meal suggestion (secondary / later).** A small feature, layered on only after the core loop works: given the profile, exclusions, staples, and the calories/protein still remaining today, suggest ONE meal at a time (never full plans). Structured JSON via the Vercel AI SDK (`generateObject`/streaming), savable as a `Meal` and/or logged. Keep the provider swappable behind the AI SDK's provider packages — do not hardcode one. Free tier is capped (metered server-side); Pro removes the cap.
 
@@ -116,7 +118,7 @@ Never commit `.env` files; keep `.env.example` files current when adding variabl
 
 ## Backend specifics (existing scaffold)
 
-- NestJS 11, listens on `PORT ?? 3001`. Global `ValidationPipe` (`whitelist`, `transform`), global `PrismaExceptionFilter`, global `ThrottlerGuard`, `cookie-parser`, CORS restricted to `FRONTEND_URL` with credentials.
+- NestJS 11, listens on `PORT ?? 3001`. Global `ValidationPipe` (`whitelist`, `transform`), global `PrismaExceptionFilter`, global `ThrottlerGuard`, CORS restricted to `FRONTEND_URL` with credentials.
 - Prisma 7 with the `pg` driver adapter; client generated to `backend/generated/prisma` (gitignored). `PrismaService` is `@Global`. **Run `npx prisma generate` after every schema edit** — client types otherwise lag the schema.
 - `src/common/` holds the shared `@CurrentUser()` decorator, `UserPayload` type, and the Prisma exception filter.
 - Local Postgres via `docker-compose.yml` (postgres:16, host port **5433**).

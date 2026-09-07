@@ -12,7 +12,7 @@ export default defineConfig({
     // dot matches any subdomain, so new ngrok URLs work without editing this.
     allowedHosts: [".ngrok-free.dev"],
     // proxy API calls to the backend so the app talks to it same-origin —
-    // no CORS, no mixed content, and the auth cookie works through the tunnel
+    // no CORS and no mixed content through the tunnel
     proxy: {
       "/api": {
         target: "http://localhost:3001",
